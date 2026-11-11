@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>교사로 다시 태어나기</title>
+<style>
+@font-face{font-family:'Galmuri11';src:url('Galmuri11.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'Galmuri11';src:url('Galmuri11-Bold.woff2') format('woff2');font-weight:700;font-display:swap}
+:root{--ink:#1a1c2c;--dk:#333c57;--navy:#29366f;--gry:#566c86;--lgr:#94b0c2;--wht:#f4f4f4;--yel:#ffcd75;--org:#ef7d57;--red:#b13e53;--grn:#38b764;--sky:#41a6f6}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#0d0e17;color:var(--wht);font-family:'Galmuri11',monospace;overflow:hidden;user-select:none;-webkit-user-select:none}
+#app{position:relative;max-width:1100px;height:100dvh;margin:0 auto;display:flex;flex-direction:column;background:var(--ink)}
+#hud{flex:none;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 16px;padding:12px 132px 12px 16px;background:var(--dk);border-bottom:4px solid var(--navy);font-size:clamp(20px,3vw,28px);line-height:1.35}
+#hud .nm{font-weight:700;color:var(--yel)}
+#hud .ag{color:var(--org)}
+#hud .rl{color:var(--lgr)}
+#hud .pl{width:100%;color:var(--lgr);font-size:clamp(16px,2.2vw,21px)}
+#prog{flex:none;display:flex;gap:3px;padding:6px 12px;background:var(--ink)}
+#prog i{flex:1;height:12px;background:var(--dk)}
+#prog i.d{background:var(--org)}
+#prog i.c{background:var(--yel)}
+.p2 #prog{background:#808080}.p2 #prog i{background:#c0c0c0;box-shadow:inset 1px 1px 0 #404040}.p2 #prog i.d{background:#0a246a;box-shadow:none}.p2 #prog i.c{background:#3a6ea5;box-shadow:none}
+#stage{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:#000;overflow:hidden;cursor:pointer}
+#scene{display:block;image-rendering:pixelated;image-rendering:crisp-edges}
+#banner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(26,28,44,.86);opacity:0;pointer-events:none;transition:opacity .25s;text-align:center;padding:0 16px}
+#banner.on{opacity:1;pointer-events:auto}
+#banner .by{font-size:clamp(34px,7vw,64px);font-weight:700;color:var(--yel);text-shadow:4px 4px 0 var(--red)}
+#banner .bt{font-size:clamp(22px,4vw,36px)}
+#dlg{position:relative;flex:none;margin:10px 12px 8px;padding:14px 18px 34px;height:220px;overflow:hidden;background:var(--ink);border:4px solid var(--wht);box-shadow:inset 0 0 0 4px var(--navy);cursor:pointer}
+#who,#whoM{display:inline-block;margin:0 0 8px;padding:3px 10px;background:var(--red);font-size:clamp(19px,2.6vw,26px);font-weight:700;min-width:1em}
+#who.hid{visibility:hidden}
+#txt,#txtM{font-size:clamp(23px,3.3vw,34px);line-height:1.55;white-space:pre-wrap;word-break:keep-all}
+#next{position:absolute;right:14px;bottom:8px;color:var(--yel);font-size:20px;animation:blink 1s steps(2) infinite;visibility:hidden}
+@keyframes blink{50%{opacity:0}}
+#choices,#choicesM{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+#choices .btn,#choicesM .btn{flex:1 1 220px}
+.btn{font:inherit;font-size:clamp(19px,2.6vw,24px);color:var(--ink);background:var(--yel);border:none;box-shadow:0 5px 0 var(--org),inset 0 0 0 3px var(--ink);padding:12px 16px;cursor:pointer;text-align:center}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--org),inset 0 0 0 3px var(--ink)}
+.btn.alt{background:var(--lgr);box-shadow:0 5px 0 var(--gry),inset 0 0 0 3px var(--ink)}
+#bar{flex:none;display:flex;gap:12px;padding:4px 12px 14px}
+#bar .btn{flex:1}
+#icons{position:absolute;top:10px;right:12px;z-index:30;display:flex;gap:8px}
+.ic{width:52px;height:46px;font:inherit;font-size:24px;line-height:1;color:var(--ink);background:var(--yel);border:none;box-shadow:0 4px 0 var(--org),inset 0 0 0 3px var(--ink);cursor:pointer;padding:0}
+.ic.off{background:var(--lgr);box-shadow:0 4px 0 var(--gry),inset 0 0 0 3px var(--ink)}
+#snd{position:absolute;top:68px;right:12px;z-index:31;width:min(360px,calc(100% - 24px));padding:18px;background:var(--ink);border:4px solid var(--wht);box-shadow:inset 0 0 0 4px var(--navy);display:none}
+#snd.on{display:block}
+#snd label{display:block;font-size:20px;margin:4px 0 8px}
+#snd input[type=range]{width:100%;height:32px;accent-color:var(--yel);margin:0 0 14px}
+#snd .val{float:right;color:var(--yel)}
+.ov{position:absolute;inset:0;z-index:5;display:none;flex-direction:column;padding:72px 16px 16px;overflow:auto;background:rgba(26,28,44,.95)}
+.ov.on{display:flex}
+#menu,#refs,#end{background:var(--ink)}
+.panel{width:100%;max-width:860px;margin:auto;padding:24px 22px;background:var(--ink);border:4px solid var(--wht);box-shadow:inset 0 0 0 4px var(--navy)}
+.panel h2{margin:0 0 6px;font-size:clamp(17px,2.4vw,22px);color:var(--org)}
+.panel h3{margin:0 0 18px;font-size:clamp(26px,4vw,38px);color:var(--yel);line-height:1.35}
+.panel p{margin:0 0 14px;font-size:clamp(19px,2.6vw,24px);line-height:1.7;word-break:keep-all}
+.src{margin:18px 0 18px;padding-top:14px;border-top:3px dashed var(--gry);font-size:clamp(16px,2.2vw,20px);line-height:1.8}
+.src a,#refs a{color:var(--sky);text-decoration:none;border-bottom:2px solid var(--sky)}
+.tag{display:inline-block;margin-right:8px;padding:0 6px;font-size:.78em;color:var(--ink);background:var(--lgr)}
+.tag.t1{background:var(--yel)}.tag.t2{background:var(--grn)}.tag.t3{background:var(--sky)}.tag.t4{background:var(--org)}
+.wide{width:100%}
+#menu .panel{border:none;box-shadow:none;background:transparent;text-align:center;padding:8px 4px}
+#menuArt{width:100%;max-width:640px;aspect-ratio:160/100;image-rendering:pixelated;border:4px solid var(--wht);box-shadow:inset 0 0 0 4px var(--navy)}
+#menu .big{cursor:pointer;font-size:clamp(38px,8vw,72px);font-weight:700;color:var(--yel);text-shadow:4px 4px 0 var(--red);margin:20px 0 24px;line-height:1.3}
+.part{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:640px;margin:0 auto 16px;font-size:clamp(22px,3.2vw,30px);padding:16px 20px}
+.part small{font-size:.7em;opacity:.75}
+#p2{background:#73eff7;box-shadow:0 5px 0 #257179,inset 0 0 0 3px var(--ink)}
+#p2:active{box-shadow:0 1px 0 #257179,inset 0 0 0 3px var(--ink)}
+#p2.locked{background:var(--dk);color:var(--gry);box-shadow:0 5px 0 #22283d,inset 0 0 0 3px var(--gry);cursor:not-allowed}
+.part.locked{background:var(--dk);color:var(--gry);box-shadow:0 5px 0 #22283d,inset 0 0 0 3px var(--gry);cursor:not-allowed}
+#refs ol{margin:0 0 16px;padding-left:28px;font-size:clamp(17px,2.4vw,22px);line-height:1.7}
+#refs li{margin-bottom:8px}
+#refs .fn{font-size:clamp(16px,2.2vw,20px);color:var(--lgr)}
+#intro{background:#000;justify-content:center;align-items:center;cursor:pointer}
+#introTxt{white-space:pre-line;font-size:clamp(28px,5.5vw,48px);line-height:1.7;text-align:center;padding:0 20px;word-break:keep-all}
+#introNext{color:var(--yel);font-size:28px;margin-top:22px;animation:blink 1s steps(2) infinite;visibility:hidden}
+#log ul{list-style:none;margin:0;padding:0}
+#log li{padding:10px 0;border-bottom:3px dashed var(--dk);font-size:clamp(18px,2.5vw,23px);line-height:1.5}
+#log li b{color:var(--org);font-weight:400;margin-right:10px}
+#log{z-index:20}
+#confirm{z-index:40;justify-content:center;background:rgba(13,14,23,.85)}
+#confirm .panel{max-width:520px;text-align:center}
+.row{display:flex;gap:12px}.row .btn{flex:1}
+#txt.nar{color:var(--lgr)}
+#dlgM{position:absolute;left:0;top:0;visibility:hidden;pointer-events:none;height:auto!important;overflow:visible!important;z-index:-1}
+
+/* 2부: 90년대 PC 창 */
+.p2{--bev:inset -3px -3px 0 #404040,inset 3px 3px 0 #fff,inset -6px -6px 0 #808080}
+#app.p2{background:#008080}
+.p2 #hud{background:#d4d0c8;color:#111;border-bottom:4px solid #808080}
+.p2 #hud .nm{color:#0a246a}.p2 #hud .ag{color:#a1262a}.p2 #hud .rl,.p2 #hud .pl{color:#404040}
+.p2 #banner{background:rgba(0,96,96,.9)}
+.p2 #banner .by{color:#b8f28c;text-shadow:4px 4px 0 #0a246a}
+.p2 #dlg{background:#d4d0c8;color:#111;border:none;box-shadow:var(--bev)}
+.p2 #who{background:#0a246a;color:#fff}
+.p2 #txt.nar{color:#505a66}
+.p2 #next{color:#0a246a}
+.p2 .btn,.p2 .btn.alt{background:#d4d0c8;color:#111;box-shadow:var(--bev)}
+.p2 .btn:active{transform:none;box-shadow:inset 3px 3px 0 #404040,inset -3px -3px 0 #fff}
+.p2 .ic,.p2 .ic.off{background:#d4d0c8;color:#111;box-shadow:inset -3px -3px 0 #404040,inset 3px 3px 0 #fff}
+.p2 .ov{background:rgba(0,128,128,.96)}
+.p2 #refs,.p2 #end{background:#008080}
+.p2 .panel{background:#d4d0c8;color:#111;border:none;box-shadow:var(--bev);padding-top:0}
+.p2 .panel h2{margin:0 -22px 14px;padding:8px 22px;background:#0a246a;color:#fff}
+.p2 .panel h3{color:#0a246a}
+.p2 .src{border-top-color:#808080}
+.p2 .src a,.p2 #refs a{color:#0000a8;border-bottom-color:#0000a8}
+.p2 #refs .fn{color:#404040}
+.p2 #log li{border-bottom-color:#a0a0a0}.p2 #log li b{color:#a1262a}
+.p2 #snd{background:#d4d0c8;color:#111;border:none;box-shadow:var(--bev)}.p2 #snd .val{color:#0a246a}
+.p2 #confirm p{color:#111}
+.p2 #endNext,.p2 #confirm p+p{color:#505a66!important}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="icons">
+    <button class="ic" id="bVol" aria-label="음량 조절">≡</button>
+    <button class="ic" id="mute" aria-label="소리 끄기">♪</button>
+  </div>
+  <div id="snd">
+    <label>음악 <span class="val" id="vMusicV"></span></label>
+    <input type="range" id="vMusic" min="0" max="100" step="5">
+    <label>효과음 <span class="val" id="vSfxV"></span></label>
+    <input type="range" id="vSfx" min="0" max="100" step="5">
+    <button class="btn wide" id="bVolClose">닫기</button>
+  </div>
+
+  <div id="hud">
+    <span class="nm" id="hName">정만석</span><span id="hYear">—</span><span class="ag" id="hAge"></span><span class="rl" id="hRole"></span>
+    <span class="pl" id="hPlace"></span>
+  </div>
+  <div id="prog"></div>
+  <div id="stage">
+    <canvas id="scene" width="160" height="100"></canvas>
+    <div id="banner"><div class="by" id="bYear"></div><div class="bt" id="bTitle"></div></div>
+  </div>
+  <div id="dlg">
+    <div id="who"></div>
+    <div id="txt"></div>
+    <div id="choices"></div>
+    <div id="next">▼</div>
+  </div>
+  <div id="dlgM"><div id="whoM" class="x"></div><div id="txtM"></div><div id="choicesM"></div></div>
+  <div id="bar">
+    <button class="btn alt" id="bLog">인생 기록</button>
+    <button class="btn alt" id="bHome">메인으로</button>
+  </div>
+
+  <div class="ov on" id="menu">
+    <div class="panel">
+      <canvas id="menuArt" width="160" height="100"></canvas>
+      <div class="big">교사로<br>다시 태어나기</div>
+      <button class="btn part" id="p1"><span>1부 · 정만석</span><small>1946 — 1992</small></button>
+      <button class="btn part" id="p2"><span>2부 · 윤혜경</span><small id="p2y">1987 — 2027</small></button>
+      <button class="btn part locked" id="p3" disabled><span>3부</span><small>잠겨 있음</small></button>
+    </div>
+  </div>
+
+  <div class="ov" id="refs">
+    <div class="panel">
+      <h2 id="refsPart">1부 · 정만석</h2>
+      <h3>이 게임은 다음과 같은 내용을 참조해 만들어졌습니다</h3>
+      <ol id="refsList"></ol>
+      <p class="fn">인물과 대사는 지어낸 것이며, 사건마다 열리는 「그때는」은 기록입니다.</p>
+      <button class="btn wide" id="bRefsGo">시작하기</button>
+    </div>
+  </div>
+
+  <div class="ov" id="intro">
+    <div id="introTxt"></div>
+    <div id="introNext">▼</div>
+  </div>
+
+  <div class="ov" id="card">
+    <div class="panel">
+      <h2 id="cYear"></h2>
+      <h3 id="cTitle"></h3>
+      <div id="cBody"></div>
+      <div class="src" id="cSrc"></div>
+      <button class="btn wide" id="bCardNext"></button>
+    </div>
+  </div>
+
+  <div class="ov" id="log">
+    <div class="panel">
+      <h3>인생 기록</h3>
+      <ul id="logList"></ul>
+      <button class="btn wide" id="bLogClose" style="margin-top:18px">닫기</button>
+    </div>
+  </div>
+
+  <div class="ov" id="end">
+    <div class="panel" style="text-align:center">
+      <h2 id="endH2"></h2>
+      <h3 id="endH3"></h3>
+      <p id="endP"></p>
+      <p style="color:var(--lgr)" id="endNext"></p>
+      <button class="btn wide" id="bEndLog" style="margin-bottom:14px">인생 기록 보기</button>
+      <button class="btn alt wide goMenu">메인으로</button>
+    </div>
+  </div>
+
+  <div class="ov" id="confirm">
+    <div class="panel">
+      <p style="font-size:clamp(22px,3vw,28px)">메인 화면으로 돌아가시겠습니까?</p>
+      <p style="color:var(--lgr);font-size:clamp(17px,2.3vw,20px)">지금까지의 진행은 저장되지 않습니다.</p>
+      <div class="row"><button class="btn" id="bYes">돌아가기</button><button class="btn alt" id="bNo">계속하기</button></div>
+    </div>
+  </div>
+</div>
+<script>
+const S={기록원:'t1',원문:'t2',연구:'t3',보도:'t4',교총:'t5','2차':'t5','미군정 문서':'t1',사전:'t3',유물:'t2'};
+const EV1 = [
+ {y:'1945', age:18, t:'절반만 남은 교무실', role:'졸업생', place:'전남 보성, 모교 국민학교', sc:'office', mu:'B',
+  L:[["", "1945년 가을. 중학교를 마친 정만석은 어릴 적 다닌 국민학교를 찾아갔다."], ["옛 담임", "아이고, 만석이 아니냐. 몰라보게 컸구나."], ["정만석", "선생님, 그간 평안하셨습니까. 학교가 왜 이리 조용합니까?"], ["옛 담임", "일본인 교장도, 일본인 선생들도 다 떠났다."], ["", "교무실 책상은 절반이 비어 있었다."], ["옛 담임", "아이들은 오는데 가르칠 사람이 없어."], ["옛 담임", "너처럼 중학교까지 마친 사람이 있어야 한다. 선생 기르는 강습이 곧 열린다더라."], ["정만석", "제가… 선생 노릇을 해도 되겠습니까?"], ["옛 담임", "구구단 못 외워 남던 녀석이 선생이라. 누구나 처음은 있는 법이다."]],
+  card:['해방과 함께 초등교원의 40% 이상을 차지하던 일본인 교원이 떠났다.',
+        '모자란 교사를 메우는 일이 해방 직후 학교의 급한 과제가 됐다.'],
+  src:[['기록원','국가기록원 — 교원양성 정책 주제설명','https://www.archives.go.kr/next/search/listSubjectDescription.do?id=003190']]},
+
+ {y:'1946', age:19, t:'석 달짜리 선생님', role:'양성소 강습생', place:'전남, 임시 초등교원양성소', sc:'training', mu:'C',
+  L:[["", "1946년. 만석은 임시 초등교원양성소에 들어갔다."], ["강사", "여러분은 석 달 뒤 교단에 섭니다."], ["양성소 동기", "석 달이요? 사범학교는 몇 해씩 다닌다던데."], ["강사", "그걸 기다릴 수가 없습니다. 교사도, 교과서도, 교실도 다 모자랍니다."], ["", "쉬는 시간, 동기가 만석의 어깨를 툭 쳤다."], ["양성소 동기", "만석이 자네는 무얼 가르치고 싶은가?"], ["정만석", "우리말이오. 학교 다닐 때 제대로 배워 본 적이 없소."], ["양성소 동기", "허허, 그럼 자네 반 아이들이 자네 선생이 되겠구먼."], ["정만석", "그래도 좋소. 같이 배우면 되지."], ["", "그해 가을, 만석은 순천 근교의 국민학교로 발령받았다."]],
+  card:['교사를 급히 채우려 도마다 임시 초등교원양성소를 세웠다. 1946년에만 24곳, 기간은 2개월~1년이었다.'],
+  src:[['기록원','국가기록원 — 교원양성 정책 주제설명','https://www.archives.go.kr/next/search/listSubjectDescription.do?id=003190']]},
+
+ {y:'1948.10', age:21, t:'새 국어책', role:'교사', place:'전남 순천 근교 국민학교', sc:'book', mu:'A',
+  L:[["", "1948년 10월. 교무실에 교과서 꾸러미가 도착했다."], ["동료 교사", "정 선생, 새 국어책이오! 정부가 서고 나서 처음 만든 국어책이랍디다."], ["정만석", "우리 손으로 만든 책이로군. 종이 냄새부터 다르오."], ["", "만석은 1학년 교실에 책을 한 권씩 나눠 주었다."], ["아이", "선생님, 개 그림이 있어요!"], ["아이", "얘가 바둑이고, 이 애가 철수래요."], ["정만석", "그래, 순길아. 학교 앞 누렁이보다 낫냐?"], ["아이", "누렁이가 더 이뻐요!"], ["정만석", "허허. 오늘부터 이 책으로 공부한다. 다 같이 따라 읽어라."]],
+  card:['1948년 10월 5일 『바둑이와 철수』가 나왔다. 정부 수립 뒤 처음 펴낸 국어 교과서다.',
+        '2006년 교과서 연구단체가 이날을 ‘교과서의 날’로 정했다.'],
+  src:[['2차','한국민족문화대백과 — 바둑이와 철수','https://encykorea.aks.ac.kr/Article/E0075681'],
+       ['교총','한국교육신문 2006 — 교과서의 날','https://hangyo.com/mobile/article.html?no=16410']]},
+
+ {y:'1948.10', age:21, t:'비어 있는 책상', role:'교사', place:'전남 순천 근교 국민학교', sc:'emptydesk', mu:'off',
+  L:[["", "1948년 10월. 여수와 순천에서 총성이 이어졌다."], ["김 선생", "만석이, 이 난리가 가라앉으면 장기나 한 판 두세."], ["정만석", "좋소. 지난번 진 것까지 이번에 갚으리다."], ["김 선생", "허허, 말은. 차 떼고 둬 줄까?"], ["", "며칠 뒤, 김 선생은 학교에 나오지 않았다."], ["", "이웃들은 그가 끌려갔다고만 했다. 그는 돌아오지 않았다."], ["", "교무실에는 김 선생의 책상이 그대로 남았다."], ["정만석", "……"], ["", "만석은 그 일을 오랫동안 누구에게도 말하지 않았다."]],
+  card:['여순사건 뒤 ‘부역자’로 몰린 민간인 학살이 이어졌고, 희생자 가운데 국민학교 교사도 있었다.',
+        '유족들은 연좌제가 두려워 수십 년을 침묵했다.'],
+  src:[['보도','세계일보 2024','https://www.segye.com/newsView/20240623504483'],
+       ['보도','YTN 2025','https://www.ytn.co.kr/_ln/0115_202510191837483525']]},
+
+ {y:'1949.5', age:22, t:'명단', role:'교사', place:'전남 순천 근교 국민학교', sc:'envelope', mu:'B',
+  L:[["", "1949년 5월. 교장이 만석을 교장실로 불렀다."], ["교장", "정 선생, 문 좀 닫게."], ["교장", "경찰에서 도에 명단을 또 넘겼다는구먼. 지난번에도 여럿이 학교를 떠났지."], ["정만석", "이번엔 몇이나 됩니까?"], ["교장", "도내에 천여 명이라더군. 학교 문을 닫는 한이 있어도 내보내겠다는 게야."], ["정만석", "우리 학교에도… 이름이 있습니까?"], ["교장", "모르네. 그러니 말조심하게. 교무실에서도, 집에서도."], ["교장", "자네는 아직 젊네. 아이들 곁에 오래 있어야 할 사람이야."]],
+  card:['1949년 5월 전남은 ‘불온교원’ 400여 명을 숙청한 데 이어, 도 경찰국이 1,000여 명을 다시 지명했다.',
+        '도 학무국장은 학교가 문을 닫더라도 숙청하겠다고 했다.'],
+  src:[['원문','동광신문 1949.5.6 (자료대한민국사)','https://db.history.go.kr/contemp/level.do?levelId=dh_012_1949_05_06_0180']]},
+
+ {y:'1953', age:26, t:'분유 한 컵', role:'교사', place:'전남 순천 근교 국민학교', sc:'milk', mu:'A',
+  L:[["", "1953년, 전쟁이 멈춘 해. 점심때면 아이들이 컵을 들고 줄을 섰다."], ["아이", "선생님, 오늘도 우유예요?"], ["정만석", "분유다. 한 사람에 한 컵씩."], ["아이", "두 컵 먹으면 안 돼요? 집에 동생이 있는디요."], ["정만석", "……뒤에도 기다리는 아이들이 많다. 대신 천천히 마셔라."], ["아이", "선생님은 안 드세요?"], ["정만석", "나는 아까 먹었다. 어서 마셔라."], ["", "아이 입가에 하얀 분유 자국이 남았다. 만석은 말없이 손수건을 건넸다."]],
+  card:['1953년 원조 분유로 하루 150만 컵이 아이들에게 무상으로 돌아갔다. 1963년에는 원조 식빵이 193만 명에게 배급됐다.'],
+  src:[['기록원','국가기록원 — 급식','https://theme.archives.go.kr/next/koreaOfRecord/cafeteria.do']]},
+
+ {y:'1955', age:28, t:'오전반, 오후반', role:'교사', place:'전남 순천 근교 국민학교', sc:'tent', mu:'A',
+  L:[["", "1955년. 만석의 반은 80명이 넘었다."], ["", "교실이 모자라 운동장에 친 천막을 다른 반과 오전·오후로 나눠 썼다."], ["정만석", "우리 반은 오전반이다. 열두 시 전에 다 끝내야 한다."], ["아이", "선생님, 제 자리가 없어요."], ["정만석", "용팔아, 조금만 붙어 앉아라. 옳지, 자리 났다."], ["정만석", "공책은 무릎에 놓고 쓰거라. 구기지 말고."], ["", "정오가 되자 만석의 반이 나가고 오후반이 들어왔다."], ["아이", "선생님, 비 오면 어떻게 해요?"], ["정만석", "비 오면… 그날은 옛날이야기나 하자."], ["아이들", "비 와라, 비 와라!"]],
+  card:['1954~1959년 의무교육 계획으로 취학률은 96.4%까지 올랐다.',
+        '그러나 교실이 모자라 한 반이 80명을 넘거나 하루 3부제로 수업하는 학교도 있었고, 천막교실도 생겼다.'],
+  src:[['기록원','국가기록원 — 의무교육','https://theme.archives.go.kr/next/koreaOfRecord/compulsoryEdu.do']]},
+
+ {y:'1961.9', age:34, t:'당겨진 정년', role:'교사', place:'전남 순천의 국민학교', sc:'leave61', mu:'B',
+  L:[["", "1961년 가을, 순천 시내의 학교. 교원 정년이 65세에서 60세로 당겨졌다."], ["", "교무실에서 가장 나이 많은 선생님이 짐을 쌌다."], ["노교사", "정 선생, 나는 이번 달로 끝일세. 하룻밤 새 정년이 지나 버렸네."], ["정만석", "선생님 반 아이들은 누가 맡습니까?"], ["노교사", "당분간은 다들 나눠 맡아야지. 사범학교를 2년제 대학으로 바꾼다니,"], ["노교사", "언젠가는 대학 나온 선생들이 오겠지."], ["정만석", "저는 석 달 배우고 들어온 사람입니다."], ["노교사", "그러니 더 부지런히 가르치게. 아이들은 선생 학력을 묻지 않네."], ["정만석", "창가 화분은 제가 맡겠습니다. 물 거르지 않겠습니다."], ["", "두 해 남짓 뒤, 정년은 다시 65세로 돌아왔다."]],
+  card:['1961년 교원 정년이 65세에서 60세로 줄었다가, 1963년 2월 61세, 12월 다시 65세가 됐다.',
+        '1962년 사범학교가 2년제 교육대학이 됐다.'],
+  src:[['원문','서울신문 1998.11.3','https://www.seoul.co.kr/news/1998/11/03/19981103001001'],
+       ['2차','한국민족문화대백과 — 광주교육대학교','https://encykorea.aks.ac.kr/Article/E0005230']]},
+
+ {y:'1965', age:38, t:'밤까지 켜진 교실', role:'6학년 담임', place:'전남 순천의 국민학교', sc:'evening', mu:'A',
+  L:[["", "1965년. 6학년 교실의 불은 해가 진 뒤에도 켜져 있었다."], ["아이", "선생님, 산수 문제 하나만 더 내 주세요."], ["정만석", "오늘은 여기까지다, 영식아. 집에 가서 밥 먹어라."], ["아이", "밥 먹고 또 와도 돼요?"], ["정만석", "안 된다. 자는 것도 공부다."], ["", "아이들이 돌아간 뒤, 한 어머니가 교실 문을 두드렸다."], ["학부모", "선생님, 저녁에 우리 애 좀 따로 봐 주시면… 사례는 하겠습니다."], {"choice": [["받아들인다", [["학부모", "고맙습니다, 선생님. 꼭 붙게 해 주세요."], ["정만석", "……붙고 안 붙고는 저 아이가 하기에 달렸습니다."]]], ["거절한다", [["정만석", "낮에 가르치는 것으로 족합니다. 돌아가 보십시오."], ["학부모", "그럼 다른 선생님한테라도 부탁해 봐야지요…"]]]]}, ["", "그날 밤, 만석은 칠판의 산수 문제를 오래 보고 있었다."], ["정만석", "열세 살짜리들이 밤길을 다니는구먼."]],
+  card:['1960년대 한 조사에서 중학 입시를 앞둔 국민학생의 81.2%가 과외를 받았다.',
+        '과외 공부를 4시간 이상 받는 아이도 48.2%였다.'],
+  src:[['기록원','국가기록원 — 과외','https://theme.archives.go.kr/next/koreaOfRecord/privateLesson.do']]},
+
+ {y:'1968.7.15', age:41, t:'어린이 해방', role:'6학년 담임', place:'전남 순천의 국민학교', sc:'cheer', mu:'C',
+  L:[["", "1968년 7월 15일. 교무실에 소식이 들어왔다."], ["동료 교사", "정 선생, 중학교 입시를 없앤답니다! 추첨으로 보낸대요."], ["", "소식은 금세 교실까지 퍼졌다."], ["아이", "선생님, 이제 중학교 시험 안 봐요?"], ["정만석", "서울부터 한다더라. 우리 같은 데는 몇 해 더 걸린다고 하고."], ["아이", "그럼 우리는요?"], ["정만석", "너희는 시험을 봐야지. 그래도 너희 동생들은 안 보게 된단다."], ["아이", "우리 순덕이는 이제 2학년이니께 시험 안 보겠네!"], ["정만석", "그래. 대신 순덕이 숙제는 네가 봐 줘라."], ["", "아이들은 아쉬운 얼굴로 웃었다."]],
+  card:['1968년 7월 15일 중학교 입시 폐지가 발표돼 ‘7·15 어린이 해방’으로 불렸다.',
+        '무시험 진학은 1969년 서울, 1970년 광주 등 9개 도시, 1971년 전국으로 넓어졌다.'],
+  src:[['기록원','국가기록원 — 과외','https://theme.archives.go.kr/next/koreaOfRecord/privateLesson.do'],
+       ['2차','한국민족문화대백과 — 중학교 무시험진학제','https://encykorea.aks.ac.kr/Article/E0076169']]},
+
+ {y:'1968.12', age:41, t:'393자', role:'6학년 담임', place:'전남 순천의 국민학교', sc:'charter', mu:'A',
+  L:[["", "1968년 12월. 국민교육헌장이 선포됐다."], ["반장", "모두 일어서!"], ["", "그 뒤로 아이들은 날마다 수업 전에 일어서서 헌장을 읽고 외웠다."], ["아이", "선생님, 이것도 중학교 시험에 나와요?"], ["정만석", "나올지도 모르지. 393자다. 외워 두거라."], ["아이", "선생님은 다 외우셨어요?"], ["정만석", "……어서 앉아라."], ["아이", "선생님도 못 외우셨구나!"], ["정만석", "반장, 다시 처음부터."]],
+  card:['1968년 12월 5일 선포된 393자의 국민교육헌장은 모든 교과서 첫머리에 실렸고, 아이들은 수업 전에 다 같이 외웠다.'],
+  src:[['기록원','국가기록원 — 국민교육헌장','https://theme.archives.go.kr/next/koreaOfRecord/charterNaEdu.do']]},
+
+ {y:'1971', age:44, t:'도시락 뚜껑', role:'교사', place:'전남 순천의 국민학교', sc:'lunch', mu:'A',
+  L:[["", "1971년. 점심시간이면 먹기 전에 도시락 검사부터 했다."], ["정만석", "자, 도시락 뚜껑 열어 봐라."], ["아이", "선생님, 저는 보리 많이 넣었어요!"], ["정만석", "그래, 춘식이 밥은 보리가 반이로구나."], ["", "한 아이만 뚜껑을 손으로 누르고 있었다."], ["아이", "……할머니가 쌀밥만 싸 주셨어요. 저 오늘 못 먹어요?"], ["정만석", "내 도시락은 보리가 많다. 반씩 덜어서 섞자."], ["정만석", "내일은 할머니께 보리 섞어 달라고 말씀드려라."], ["아이", "선생님 반찬은 멸치네요."], ["정만석", "멸치도 반 주랴?"]],
+  card:['1970년대 초에는 도시락 검사를 해서, 잡곡이 30% 이상 섞이지 않은 도시락은 먹지 못하게 했다.'],
+  src:[['기록원','국가기록원 — 혼분식','https://theme.archives.go.kr/next/koreaOfRecord/EncourageSoul.do']]},
+
+ {y:'1979', age:52, t:'탐구생활', role:'교사', place:'광주의 국민학교', sc:'tamgu', mu:'C',
+  L:[["", "1979년 여름방학식 날. 만석은 이제 광주의 국민학교에서 가르쳤다."], ["", "교실에 새 책이 한 권씩 돌았다."], ["정만석", "방학 숙제다. 하루에 한 장씩 하는 거다."], ["아이", "선생님, 이거 공짜예요?"], ["정만석", "나라에서 주는 거다. 잃어버리지 마라."], ["아이", "밀리면 어떻게 돼요?"], ["정만석", "개학 전날 운다."], ["", "아이들이 웃었다. 만석도 웃었다."], ["아이", "선생님은 왜 선생님 됐어요?"], ["정만석", "……석 달 배우고 나니, 아이들이 기다리고 있더라."]],
+  card:['1979년 여름방학부터 『탐구생활』이 국민학생 570여만 명에게 무료로 배부됐다.',
+        '1979년 대한교련 보고서에서 초등교원의 사회적 서열은 32개 직업 가운데 25위였다.'],
+  src:[['기록원','국가기록원 — 방학','https://theme.archives.go.kr/next/koreaOfRecord/vacation.do'],
+       ['교총','한국교육신문, 이길상 연재 (대한교련 보고서 인용)','https://hangyo.com/news/article.html?no=81385']]},
+
+ {y:'1980.5', age:53, t:'휴교한 학교', role:'교감', place:'광주의 국민학교', sc:'night', mu:'off',
+  L:[["", "1980년 5월. 학교에는 아이들이 오지 않았다."], ["", "그해 교감이 된 만석은 비어 있는 학교를 지켰다."], ["숙직 교사", "교감 선생님, 오늘은 댁에 들어가 보시지요."], ["정만석", "아닐세. 누가 찾아올지 모르니 불은 켜 두세."], ["숙직 교사", "그럼 저도 같이 있겠습니다."], ["정만석", "……고맙네. 보리차나 끓이세."], ["", "숙직실 창으로 먼 소리가 들려왔다."], ["숙직 교사", "아이들은… 다들 집에 있겠지요?"], ["정만석", "그래야지."], ["", "학교가 다시 문을 연 날, 만석은 교실마다 돌며 아이들 얼굴을 하나하나 살폈다."]],
+  card:['5·18 당시 계엄군에 희생된 광주의 초·중·고생은 16개교 18명이다.',
+        '효덕국민학교 4학년 전재수 군은 동네에서 놀다 총에 맞아 숨졌다.'],
+  src:[['보도','뉴시스 2019','https://www.newsis.com/view/NISX20190512_0000647634']]},
+
+ {y:'1982.3', age:55, t:'바른 생활', role:'교감', place:'광주의 국민학교', sc:'tonghap', mu:'C',
+  L:[["", "1982년 3월. 1학년 교실에 처음 보는 교과서가 들어왔다."], ["1학년 담임", "교감 선생님, 국어하고 사회하고 도덕을 한 권으로 묶었답니다."], ["1학년 담임", "이름이 ‘바른 생활’이랍니다."], ["정만석", "즐거운 생활도 있구먼. 과목 이름이 꼭 아이들 말 같네."], ["1학년 담임", "아이들 생활에서 시작하라는데, 진도를 어찌 나가야 할지 모르겠습니다."], ["정만석", "나는 교과서가 모자라 칠판에 베껴 쓰던 사람일세. 처음엔 다 낯설지."], ["정만석", "모르는 건 같이 보세. 언제든 교무실로 오게."], ["", "교실 문 앞에서 아이 하나가 담임을 붙잡았다."], ["아이", "선생님, 즐거운 생활 시간에는 노래해요?"], ["1학년 담임", "응. 노래도 하고, 그림도 그리고."]],
+  card:['1982년 제4차 교육과정으로 국민학교 저학년 교과서가 묶였다. 도덕·국어·사회는 ‘바른 생활’, 체육·음악·미술은 ‘즐거운 생활’, 1학년 산수·자연은 ‘슬기로운 생활’이 되었다.',
+        '묶인 것은 교과서였다. 교육과정까지 통합한 것은 제5차 교육과정부터다.'],
+  src:[['사전','한국민족문화대백과사전 「교과서」(이종국), 제4차 교육과정기의 교과서','https://encykorea.aks.ac.kr/Article/E0005441'],
+       ['연구','김창복·이경순(2009), 초등교육, 아동학회지 30(6), 225쪽','https://koreascience.kr/article/JAKO200927964151413.pdf']]},
+
+ {y:'1992', age:65, t:'마지막 출석부', role:'교장', place:'광주의 국민학교', sc:'retire', mu:'A',
+  L:[["", "1992년 여름. 정년퇴임식."], ["동료 교사", "교장 선생님, 마흔여섯 해입니다."], ["정만석", "석 달 배우고 선 교단에서 마흔여섯 해라니."], ["", "식이 끝나고, 만석은 신규 때부터 지켜본 윤혜경 선생을 불러 낡은 출석부를 꺼냈다."], ["정만석", "윤 선생, 이것 좀 받아 주게. 1946년에 처음 맡은 반 출석부일세."], ["윤혜경", "이걸 왜 저한테…"], ["정만석", "자네, 첫해에 일주일 안에 이름 다 외우겠다고 했었지."], ["정만석", "이 가운데 몇은 1948년 가을 뒤로 소식을 모르네."], ["정만석", "이름은 누가 불러 줘야 남는 법일세."], ["윤혜경", "네, 교장 선생님. 잘 간직하겠습니다."]],
+  card:['국민학교 학급당 평균 학생 수는 1970년 62.1명에서 1992년 39.9명으로 줄었다.'],
+  src:[['기록원','국가기록원 — 의무교육','https://theme.archives.go.kr/next/koreaOfRecord/compulsoryEdu.do']]}
+];
+
+/* ---------- 픽셀 장면 ---------- */
+const off=document.createElement('canvas'); off.width=160; off.height=100;
+const offG=off.getContext('2d'); let g=offG;
+const cv=document.getElementById('scene'), dG=cv.getContext('2d');
+const menuG=document.getElementById('menuArt').getContext('2d'); menuG.imageSmoothingEnabled=false;
+const C={ink:'#1a1c2c',plum:'#5d275d',red:'#b13e53',org:'#ef7d57',yel:'#ffcd75',lime:'#a7f070',grn:'#38b764',teal:'#257179',navy:'#29366f',blue:'#3b5dc9',sky:'#41a6f6',cyan:'#73eff7',wht:'#f4f4f4',lgr:'#94b0c2',gry:'#566c86',dk:'#333c57',wood:'#8a5a3b',dwood:'#5a3a28',skin:'#f2c79a',board:'#2e5440',wall:'#c9b48f',floor:'#7a5534',ground:'#c2a36b'};
+const R=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x|0,y|0,w,h)};
+const KS=[C.wht,C.sky,C.yel,C.lime,C.org,C.lgr,C.cyan];
+const kc=i=>KS[(i*5+3)%KS.length];
+const EV2 = [
+ {y:'1987.3', age:23, t:'쉰두 명의 이름', role:'신규 교사', place:'광주의 국민학교', sc:'s2_first', mu:'A',
+  L:[["", "1987년 3월. 혜경은 광주의 한 국민학교로 첫 발령을 받았다."], ["교장 정만석", "윤 선생, 첫 반이 쉰두 명이라지. 많지?"], ["윤혜경", "네! 그래도 일주일 안에 이름 다 외울게요."], ["교장 정만석", "허허, 내가 젊을 땐 여든 명도 넘었네. 걱정 말게."], ["교장 정만석", "자네가 이름을 다 외우기 전에 아이들이 먼저 자네를 외울 걸세."], ["", "첫 수업 종이 울렸다."], ["아이", "선생님, 선생님은 몇 살이에요?"], ["윤혜경", "비밀! 대신 출석부터 부를게. 1번!"], ["", "이름을 다 외우겠다던 혜경도, 첫 출석은 번호로 불렀다."]],
+  card:['국민학교 여교사 비율은 1980년 36%에서 1990년 50.2%로 절반을 넘었다.'],
+  src:[['원문','서울신문 1990.12.15','https://www.seoul.co.kr/news/1990/12/15/19901215015001']]},
+
+ {y:'1989.7', age:25, t:'각서', role:'교사', place:'광주의 국민학교', sc:'s2_pledge', mu:'B',
+  L:[["", "1989년 여름. 혜경의 이름은 전교조 가입 명단에 올라 있었다."], ["", "밤늦게, 전남의 섬 학교에 있는 교대 동기에게서 전화가 왔다."], ["교대 동기", "혜경아, 자냐? 늦게 미안."], ["윤혜경", "아니, 안 자. 무슨 일 있어?"], ["교대 동기", "혜경아, 너는 써. 너까지 잘리면 안 되잖아."], ["윤혜경", "너는? 너는 어떻게 할 건데."], ["교대 동기", "난 안 쓸래. 우리 반 애들한테 거짓말하는 선생은 못 하겠어."], ["윤혜경", "……"], ["", "다음 날, 혜경은 각서를 써서 냈다. 정 교장은 받아 든 종이를 한참 내려다보았다."], ["", "동기는 그해 가을 교단을 떠났다."]],
+  card:['1989년 전교조 가입 교사 1만 2천여 명 가운데 1만여 명이 탈퇴 각서를 썼고, 1,527명이 해직됐다.',
+        '2022년 진실화해위원회는 이를 중대한 인권침해로 판단했다.'],
+  src:[['보도','서울신문 2019','https://m.seoul.co.kr/news/2019/05/27/20190527004003'],
+       ['보도','경향신문 2022','https://www.khan.co.kr/article/202212091015001']]},
+
+ {y:'1992.10', age:28, t:'음악 선생님이 따로 왔다', role:'교사', place:'광주의 국민학교', sc:'s2_music', mu:'C',
+  L:[["", "1992년 가을. 이해부터 고학년 음악 시간에는 전담 선생님이 들어왔다."], ["동료 교사", "전담 시간에 숨 좀 돌릴 줄 알았더니, 공문이 더 늘었어요."], ["교감", "그 시간 비워 드린 게 공문 쓰시라는 건 아닌데…"], ["동료 교사", "신문 보셨어요? 95년부터는 산수가 ‘수학’으로 바뀐대요."], ["윤혜경", "애들이 산수랑 수학이 뭐가 다르냐고 물으면 뭐라고 하죠?"], ["교감", "그건 윤 선생이 연구해서 우리한테도 좀 알려 주세요."], ["윤혜경", "아이고, 숙제가 하나 늘었네요."], ["", "혜경의 책상 서랍 안쪽에는 여름에 받은 낡은 출석부가 들어 있었다."]],
+  card:['1992년 국민학교에 예체능 교과전담제가 처음 실시됐다.',
+        '1995년부터는 ‘산수’가 ‘수학’이 됐다.'],
+  src:[['원문','서울신문 1992.9.14','https://www.seoul.co.kr/news/1992/09/14/19920914018001'],
+       ['원문','서울신문 1992.10.1','https://m.seoul.co.kr/news/1992/10/01/19921001018001']]},
+
+ {y:'1995', age:31, t:'모둠 책상', role:'교사', place:'광주의 국민학교', sc:'s2_open', mu:'C',
+  L:[["", "1995년 5월 31일. 정부가 교육개혁안을 내놓았다."], ["", "얼마 뒤, 혜경의 학교에도 ‘열린 교육’ 수업 시범 이야기가 내려왔다."], ["교감", "윤 선생 반부터 책상을 모둠으로 돌려 봅시다. 시범으로."], ["윤혜경", "아이들이 이렇게 많은데, 돌릴 자리가 나올까요?"], ["동료 교사", "학습지는 누가 만들어요? 결국 다 우리 몫이잖아요."], ["윤혜경", "같이 만들어요. 떡볶이는 제가 살게요."], ["", "다음 날, 책상을 돌리자 교실이 왁자해졌다."], ["아이", "선생님! 이제 칠판 말고 친구 얼굴 보면서 공부해요?"], ["윤혜경", "응. 대신 떠들면 다시 일렬로 돌려놓는다."]],
+  card:['1995년 5·31 교육개혁안은 ‘열린교육, 평생학습’을 내걸었다.',
+        '1997년에는 열린 교육 시범학교가 210곳에 이르렀다.',
+        '개혁 1년 뒤 한 중학교 교사는 학습 자료가 턱없이 부족하고 책걸상이 체격에 안 맞는다고 했다.'],
+  src:[['원문','서울신문 1996.5.31','https://www.seoul.co.kr/news/1996/05/31/19960531007001'],
+       ['원문','서울신문 1997.5.22','https://www.seoul.co.kr/news/1997/05/22/19970522022008'],
+       ['원문','서울신문 1996.5.31 — 교육개혁안 각계 반응','https://www.seoul.co.kr/news/1996/05/31/19960531007002']]},
+
+ {y:'1996.3', age:32, t:'현판이 바뀐 날', role:'교사', place:'광주의 초등학교', sc:'s2_sign', mu:'A',
+  L:[["", "1996년 3월. 개학 날 아침, 정문의 현판이 바뀌어 있었다."], ["아이", "선생님, 이제 우리 국민학생 아니에요?"], ["윤혜경", "응. 오늘부터 초등학생이야."], ["아이", "그럼 실내화 가방도 바꿔야 돼요?"], ["윤혜경", "아니, 그대로 써도 돼. 이름만 바뀐 거야."], ["동료 교사", "윤 선생, 이참에 번호로 출석 부르는 것도 없애자던데요."], ["윤혜경", "그건… 내일부터 해 볼게요."], ["", "혜경의 반에서 번호 출석은 그 뒤로도 한참 이어졌다."]],
+  card:['1996년 3월 1일 전국 5,772개 학교가 ‘국민학교’를 ‘초등학교’로 바꿨다.',
+        '‘국민학교’는 1941년 일제가 ‘황국신민’ 교육을 내세워 일본·조선·대만에 함께 쓴 이름이다.'],
+  src:[['보도','동행미디어 시대/다음 2025','https://v.daum.net/v/20250301050306320'],
+       ['원문','서울신문 1995.8.12','https://www.seoul.co.kr/news/1995/08/12/19950812021002']]},
+
+ {y:'1997.3', age:33, t:'Hello, everyone', role:'3학년 담임', place:'광주의 초등학교', sc:'s2_english', mu:'C',
+  L:[["", "1997년 3월. 3학년 시간표에 처음으로 영어가 들어왔다."], ["윤혜경", "Hello, everyone!"], ["아이들", "헬로…?"], ["윤혜경", "방학 연수에서 배운 영어라 선생님도 떨려."], ["아이", "선생님, 미국 가 봤어요?"], ["윤혜경", "아니. 영어는 선생님도 너희랑 같이 처음 가 보는 나라야."], ["아이", "그럼 선생님도 틀려도 돼요?"], ["윤혜경", "그럼. 대신 다 같이 크게. Hello!"], ["아이들", "헬로!"]],
+  card:['1997년 초등학교 3학년부터 영어가 정규 교과로 들어왔다.',
+        '2000년에도 서울 491개 초등학교에 영어 전담교사는 387명뿐이었다.'],
+  src:[['교총','한국교육신문 2026 — 한국교육정책사','https://hangyo.com/mobile/article.html?no=109527'],
+       ['원문','서울신문 2000.3.13','https://m.seoul.co.kr/news/2000/03/13/20000313023001']]},
+
+ {y:'1998', age:34, t:'급식실', role:'교사', place:'광주의 초등학교', sc:'s2_lunch', mu:'A',
+  L:[["", "1998년. 혜경의 학교에도 급식실이 생겼다."], ["아이", "선생님, 오늘 반찬 뭐예요?"], ["윤혜경", "시금치. 다 먹어야 나간다."], ["아이", "선생님, 딱 세 가닥만 먹으면 안 돼요?"], ["윤혜경", "다섯 가닥. 더는 못 깎아 줘."], ["동료 교사", "도시락 싸 오던 때가 엊그제 같은데요."], ["윤혜경", "저 학교 다닐 땐 도시락에 보리가 섞였는지 검사받았어요."], ["윤혜경", "이젠 제가 잔반 검사를 하네요."]],
+  card:['1992년 국민학교 급식률은 11.3%였다.',
+        '1998년부터 전국 모든 초등학교가 급식을 하게 됐다.'],
+  src:[['기록원','국가기록원 — 급식','https://theme.archives.go.kr/next/koreaOfRecord/cafeteria.do'],
+       ['원문','서울신문 1992.3.11','https://www.seoul.co.kr/news/1992/03/11/19920311019001']]},
+
+ {y:'1999.8', age:35, t:'선배들이 떠난 여름', role:'교사', place:'광주의 초등학교', sc:'s2_farewell', mu:'B',
+  L:[["", "1999년 8월. 교무실 책상 여러 개가 한꺼번에 비었다."], ["선배 교사", "정년이 3년 당겨졌으니 별수 있나. 윤 선생, 내 반 아이들 좀 부탁해."], ["윤혜경", "네. 틈나는 대로 들여다볼게요."], ["선배 교사", "우리 반 영철이가 아침을 자주 굶고 와. 그것만 좀 봐 줘."], ["윤혜경", "걱정 마세요. 제 서랍에 빵 넣어 둘게요."], ["윤혜경", "2학기 담임은 누가 오세요?"], ["교감", "기간제 선생님하고… 퇴직하신 분을 다시 모셔 와야지."], ["윤혜경", "정 교장 선생님 젊으셨을 때도 정년이 한 번 당겨졌다던데요."], ["교감", "그때는 두 해 남짓 만에 되돌렸다지. 이번엔 어떨지 모르겠네."]],
+  card:['1999년 교원 정년이 65세에서 62세로 줄었다.',
+        '정년 단축과 연금 불안이 겹쳐 그해 8월 말 교원 1만 8천 명이 한꺼번에 떠났다.'],
+  src:[['교총','한국교육신문 1999','https://hangyo.com/news/article.html?no=1058']]},
+
+ {y:'2000', age:36, t:'교단 옆 모니터', role:'교사', place:'광주의 초등학교', sc:'s2_pc', mu:'C',
+  L:[["", "2000년. 혜경의 교실 교단 옆에 컴퓨터와 모니터가 놓였다."], ["아이", "선생님, 괘도 어디 갔어요?"], ["윤혜경", "창고에. 이제 이걸로 보여 줄게."], ["아이", "우와, 게임도 돼요?"], ["윤혜경", "공부 다 하면… 생각해 볼게."], ["후배 교사", "윤 선생님, 이거 켜는 법 좀 알려 주세요."], ["윤혜경", "저도 어제 배웠어요. 여기 동그란 버튼이요."], ["후배 교사", "아, 이거였구나. 선생님 아니었으면 한참 헤맬 뻔했어요."]],
+  card:['PC 한 대당 초등학생 수는 1991년 54.8명에서 2005년 7.2명으로 줄었다.'],
+  src:[['교총','한국교육신문 — 괘도와 PC','https://www.hangyo.com/mobile/article.html?no=17189']]},
+
+ {y:'2003.5', age:39, t:'NEIS', role:'교사', place:'광주의 초등학교', sc:'s2_neis', mu:'B',
+  L:[["", "2003년 5월. 교무실은 며칠째 NEIS 이야기로 시끄러웠다."], ["동료 교사", "학생 정보를 교육청 서버에 다 올리라니, 이건 인권 문제예요."], ["정보부장", "그럼 다시 학교마다 따로 관리하자고요? 그러면 행정이 안 돌아가요."], ["윤혜경", "둘 다 맞는 말 같아서 더 어렵네요."], ["", "목소리가 높아지자 혜경은 커피 두 잔을 타 왔다."], ["윤혜경", "식기 전에 한 잔씩 드세요. 싸움은 그다음에."], ["정보부장", "……윤 선생한테는 못 당하겠네."], ["", "며칠 뒤, 일부 영역은 한동안 학교별로 관리하던 옛 체제(CS)로 처리하라는 지침이 내려왔다."]],
+  card:['2003년 국가인권위원회가 교육행정정보시스템(NEIS)의 인권침해 요소를 지적하자 교육계가 갈라졌다.',
+        '교육부는 27개 영역 가운데 3개를 재검토하기로 했다.'],
+  src:[['원문','서울신문 2003.5.20','https://www.seoul.co.kr/news/2003/05/20/20030520011004'],
+       ['원문','서울신문 2003.5.27','https://www.seoul.co.kr/news/2003/05/27/20030527001005']]},
+
+ {y:'2011.11', age:47, t:'학생인권조례', role:'교사', place:'광주의 초등학교', sc:'s2_rights', mu:'A',
+  L:[["", "2011년 11월. 광주에서도 학생인권조례가 공포됐다."], ["동료 교사", "봄에는 체벌 금지, 이번엔 조례까지. 이제 뭘로 지도하죠?"], ["윤혜경", "저는 매 내려놓은 지 오래됐어요. 말로 하면 시간이 좀 더 걸릴 뿐이에요."], ["동료 교사", "그 시간이 없으니까 문제죠."], ["윤혜경", "그러니까 나눠요. 힘든 아이는 우리 둘이 같이 봐요."], ["", "그날 오후, 교실에서 한 아이가 손을 들었다."], ["아이", "선생님, 학생 인권이 뭐예요?"], ["윤혜경", "너희도 존중받아야 한다는 약속이야. 선생님도 지켜야 하고."], ["아이", "그럼 선생님 인권은요?"], ["윤혜경", "……좋은 질문이네. 그건 우리 같이 지키자."]],
+  card:['2011년 3월 시행령으로 직접 체벌이 금지됐고, 11월 광주는 경기에 이어 두 번째로 학생인권조례를 공포했다.',
+        '한 달 뒤 광주시의회는 교권보호 조례를 전국 처음으로 통과시켰다.'],
+  src:[['교총','한국교육신문 2012 — 학생인권조례 & 교권보호조례','https://hangyo.com/mobile/article.html?no=76604'],
+       ['보도','주간경향 2023','https://weekly.khan.co.kr/article/202305261100571']]},
+
+ {y:'2017.5.15', age:53, t:'카네이션 한 송이', role:'교사', place:'광주의 초등학교', sc:'s2_flower', mu:'A',
+  L:[["", "2017년 5월 15일. 청탁금지법이 시행된 뒤 처음 맞는 스승의 날."], ["아이", "선생님, 이 꽃 드리면 안 된대요…"], ["반장", "그래서 제가 대표로 드리는 거예요. 다 같이 보는 데서요!"], ["반장", "편지는 다 같이 썼어요."], ["윤혜경", "고마워. 꽃은 우리 반 모두한테 받은 걸로 할게."], ["아이", "선생님, 우세요?"], ["윤혜경", "아니, 꽃가루 때문이야."], ["윤혜경", "편지는 이따 혼자 천천히 읽을게."]],
+  card:['청탁금지법은 2016년 9월 시행됐다.',
+        '2017년 1월 국민권익위원회는 학생 대표 등이 스승의 날 공개적으로 건네는 카네이션·꽃은 허용된다고 해석했다.'],
+  src:[['교총','한국교육신문 2016 — 청탁금지법 적용','https://hangyo.com/mobile/article.html?no=78647'],
+       ['교총','한국교육신문 2017.1.11','https://hangyo.com/mobile/article.html?no=79570']]},
+
+ {y:'2020.4', age:56, t:'화면 속 교실', role:'교사', place:'광주의 초등학교', sc:'s2_online', mu:'C',
+  L:[["", "2020년 4월. 개학은 화면 속에서 했다."], ["", "그해 혜경의 학교에 신규 교사 서도윤이 왔다."], ["", "혜경의 반은 짧게라도 얼굴을 보려고 따로 화상 조회를 열었다."], ["서도윤", "선생님, 마이크는 여기 이 버튼 누르시면 켜져요."], ["윤혜경", "고마워요, 서 선생. 대신 학부모 전화 받는 법은 내가 알려 줄게요."], ["서도윤", "그건 진짜 꼭 배우고 싶어요."], ["아이", "선생님! 동생이 자꾸 화면 꺼요!"], ["윤혜경", "괜찮아. 다시 들어오면 돼. 선생님 여기 있어."], ["아이", "선생님, 머리 잘랐어요?"], ["윤혜경", "화면으로도 그게 보여?"]],
+  card:['2020년 4월 사상 첫 온라인 개학이 이뤄졌다.',
+        '그해 6~7월 한국교육과정평가원 조사에서 초등교사 606명 가운데 72.9%가 원격 수업이 효과적이지 않다고 답했다.',
+        '원격 수업 효과를 등교 수업의 절반이 안 된다고 본 초등교사도 54.5%였다.'],
+  src:[['원문','서울신문 2020.3.31','https://m.seoul.co.kr/news/2020/03/31/20200331800043'],
+       ['연구','권점례 외(2020), 한국교육과정평가원 연구보고 RRC 2020-2, 82~83쪽 표 Ⅲ-2-38·41','http://www.kice.re.kr']]},
+
+ {y:'2023.7', age:59, t:'교무실의 텔레비전', role:'교사', place:'광주의 초등학교', sc:'s2_news', mu:'off',
+  L:[["", "2023년 7월. 교무실 텔레비전에서 서울의 한 초등학교 소식이 흘러나왔다."], ["서도윤", "저랑 나이가 비슷한 선생님이래요."], ["윤혜경", "……"], ["서도윤", "선생님 신규 때도 이렇게 혼자 감당해야 했어요?"], ["윤혜경", "……모르겠어요. 다만 이렇게 혼자 견디게 두면 안 된다는 건 알아요."], ["윤혜경", "서 선생도 힘든 일 생기면 혼자 안고 있지 말고 꼭 말해요."], ["서도윤", "……네."], ["", "그날 저녁, 혜경은 도윤의 교실 문을 두드려 함께 퇴근했다."]],
+  card:['2023년 7월 서울 서이초등학교 교사의 죽음 뒤, 국회는 ‘교권보호 5법’을 통과시켰다.',
+        '2025년 교총 설문에서 교원 79.3%는 교권보호 5법 시행 뒤 변화를 체감하지 못한다고 답했다.'],
+  src:[['보도','머니투데이 2025','https://www.mt.co.kr/society/2025/07/18/2025071715461240721']]},
+
+ {y:'2026', age:62, t:'마지막 학기', role:'교사', place:'광주의 초등학교', sc:'s2_last', mu:'A',
+  L:[["", "2026년. 혜경의 마지막 학기."], ["서도윤", "올해 입학생은 몇 명이에요?"], ["윤혜경", "열두 명. 내 첫 반은 쉰두 명이었는데."], ["서도윤", "쉰두 명이요? 이름은 다 어떻게 외우셨어요?"], ["윤혜경", "첫날은 번호로 불렀죠. 그게 지금도 좀 아쉬워요."], ["윤혜경", "서 선생, 이것 좀 받아요. 1946년 출석부예요."], ["윤혜경", "정만석 교장 선생님이 퇴임하시면서 나한테 맡기셨던 거예요."], ["서도윤", "이걸 왜 저한테…"], ["윤혜경", "나도 그때 그렇게 물었어요. 이름은 누가 불러 줘야 남는다고 하셨어요."], ["윤혜경", "이제 서 선생 차례예요."]],
+  card:['2026년 초등 입학생은 처음 30만 명 아래로 내려갔다. 광주에서도 입학생이 없는 학교가 처음 나왔다.'],
+  src:[['보도','헤럴드경제 2026','https://www.heraldk.com/article/2026030301450027339']]}
+];
+
+const EV0 = [
+{
+"y": "1단계",
+"t": "질문에서 시작하기",
+"mu": "A",
+"L": [
+[
+"",
+"모든 것은 질문 하나에서 시작했다."
+],
+[
+"나",
+"해방 이후 초등교사들은 어떻게 살았을까?"
+],
+[
+"나",
+"세 사람의 삶으로 따라가 보고 싶어."
+],
+[
+"Claude",
+"좋아요. 그럼 자료부터 모아 볼게요."
+],
+[
+"Claude",
+"원문을 직접 열어 문장마다 맞춰 보고, 출처는 꼭 필요한 것만 남길게요."
+],
+[
+"나",
+"그래. 그게 먼저지."
+],
+[
+"",
+"둘은 리서치 문서부터 만들었다. 사람은 지어내고, 80년은 기록대로."
+]
+],
+"card": [
+"게임보다 리서치 문서를 먼저 만든다. 시대별 사실과 출처가 정리돼 있어야 사건을 고를 수 있다.",
+"원문 기사·법령·통계 같은 1차 자료를 먼저 찾는다. 논문은 원문을 직접 연 것만 쓰고, 초록만 본 자료는 빼거나 원문을 구해 대조한다.",
+"사실과 해석을 나누고, 출처마다 어디서 무엇을 가져왔는지 적어 둔다."
+],
+"age": null,
+"role": "",
+"place": "함께 만든 과정",
+"sc": "mk",
+"src": []
+},
+{
+"y": "2단계",
+"t": "사건 고르기",
+"mu": "C",
+"L": [
+[
+"나",
+"요즘 많이 하는 ‘다시 태어나기’ 시뮬레이터처럼 만들자."
+],
+[
+"",
+"한 사람의 일생을 사건 단위로 따라가는 텍스트 게임이다."
+],
+[
+"나",
+"대신 랜덤 말고, 정해진 시나리오로."
+],
+[
+"Claude",
+"그럼 리서치 문서에서 후보 사건부터 넉넉히 뽑아 볼게요."
+],
+[
+"",
+"후보 사건 35개가 정리됐다."
+],
+[
+"나",
+"다 넣으면 지루해. 그 시대가 보이는 것만 고르자."
+],
+[
+"Claude",
+"확인할 수 있는 사건만요. 다른 지역 일을 우리 지역 일로 옮기는 것도 빼고요."
+],
+[
+"",
+"35개 가운데 16개가 1부에 남았다."
+]
+],
+"card": [
+"후보를 넉넉히 뽑은 뒤, 역사적으로 중요하거나 그 시대를 잘 보여 주는 사건만 남긴다.",
+"장면은 지어내도 사건의 장소와 범위는 기록대로 둔다. 서울의 일을 순천 학교의 일로 옮겨 쓰지 않는 식이다."
+],
+"age": null,
+"role": "",
+"place": "함께 만든 과정",
+"sc": "mk",
+"src": []
+},
+{
+"y": "3단계",
+"t": "음악 만들기",
+"mu": "C",
+"L": [
+[
+"나",
+"배경음은 제미나이로 만들 거야. 프롬프트 좀 짜 줄래?"
+],
+[
+"Claude",
+"장면마다 만들면 너무 많아요. 용도별로 나눠 돌려 써요."
+],
+[
+"Claude",
+"부마다 기본, 어두운 장면, 밝은 장면, 기록 화면. 네 가지요."
+],
+[
+"나",
+"대사 읽는 데 방해 안 되게, 소리는 작게."
+],
+[
+"Claude",
+"그럼 ‘보컬 없음, 반복 재생, 작은 음량’도 프롬프트에 넣을게요."
+],
+[
+"",
+"첫 화면 곡 하나, 1부 네 곡, 2부 네 곡이 생겼다."
+],
+[
+"",
+"2부 네 곡은 90년대 PC 게임 같은 소리로 따로 만들었다."
+]
+],
+"card": [
+"곡은 부마다 기본·어두운 장면·밝은 장면·기록 화면 네 곡, 그리고 첫 화면 곡 하나면 충분하다.",
+"프롬프트에는 악기, 빠르기, 분위기, 보컬 없음, 반복 재생, 작은 음량을 적는다.",
+"가장 무거운 장면은 음악을 끄고 타자 소리만 남긴다."
+],
+"age": null,
+"role": "",
+"place": "함께 만든 과정",
+"sc": "mk",
+"src": []
+},
+{
+"y": "4단계",
+"t": "한 장짜리 게임",
+"mu": "A",
+"L": [
+[
+"나",
+"레트로 게임처럼 해 줘. 마우스나 터치로, 글자는 타자기처럼."
+],
+[
+"Claude",
+"화면은 HTML 파일 하나에 담을게요. 장면은 작은 도트 그림으로요."
+],
+[
+"Claude",
+"음악 파일하고 글꼴 파일은 따로 두고, 올릴 때 같이 묶을게요."
+],
+[
+"나",
+"시작하면 참고 문헌부터 보여 줘."
+],
+[
+"나",
+"그다음에 “당신은 1945년, 18살 정만석입니다.”"
+],
+[
+"Claude",
+"좋네요. 그 문장에서 바로 첫 장면으로 넘어가게 할게요."
+],
+[
+"",
+"메인 화면, 참고 문헌, 사건, 기록 카드, 엔딩이 하나로 이어졌다."
+],
+[
+"",
+"Claude는 음악·글꼴 파일과 함께 게임을 아티팩트 웹페이지로 올렸다."
+]
+],
+"card": [
+"화면 흐름: 메인 → 참고 문헌 → 시작 문장 → 사건 대사 → 「그때는」 기록 카드 → 엔딩.",
+"음악·글꼴 파일은 HTML과 함께 올린다. 사건 내용(연도·대사·카드·출처)은 한곳에 모아 두면 그 부분만 뽑아 검토하기 쉽다."
+],
+"age": null,
+"role": "",
+"place": "함께 만든 과정",
+"sc": "mk",
+"src": []
+},
+{
+"y": "5단계",
+"t": "해 보고 고치기",
+"mu": "C",
+"L": [
+[
+"",
+"나는 휴대폰과 PC로 직접 해 봤다."
+],
+[
+"나",
+"글자가 너무 작아. 휴대폰에선 음악도 겹치고."
+],
+[
+"Claude",
+"말씀하신 곳부터 고칠게요."
+],
+[
+"Claude",
+"고친 뒤엔 휴대폰·PC 화면 크기로 자동 테스트를 돌려 끝까지 가 볼게요."
+],
+[
+"",
+"글자를 키우고, 대화창 높이를 고정하고, 음량을 낮췄다."
+],
+[
+"나",
+"이제 좀 읽히네. 처음부터 다시 해 볼게."
+],
+[
+"",
+"고칠 때마다 나는 직접, Claude는 자동 테스트로 끝까지 다시 확인했다."
+]
+],
+"card": [
+"직접 끝까지 해 보고 불편한 점을 바로 말한다. 글자 크기, 진행 속도, 음량, 휴대폰 화면이 가장 자주 나온 문제였다.",
+"고친 뒤에는 휴대폰과 PC 화면에서 처음부터 다시 확인한다."
+],
+"age": null,
+"role": "",
+"place": "함께 만든 과정",
+"sc": "mk",
+"src": []
+},
+{
+"y": "6단계",
+"t": "2부, 다른 시대",
+"mu": "A",
+"L": [
+[
+"나",
+"2부는 정만석 시대랑 느낌을 다르게 하자. 좀 더 지금에 가깝게."
+],
+[
+"Claude",
+"그럼 90년대 컴퓨터 창처럼 꾸며 볼게요."
+],
+[
+"Claude",
+"회색 창, 남색 이름표, 청록 바탕. 어때요?"
+],
+[
+"나",
+"좋아. 딱 그 시절 컴퓨터 같다."
+],
+[
+"",
+"같은 틀에 옷만 바꿔 입혔다."
+],
+[
+"",
+"그리고 1부를 마쳐야 2부가 열리게 잠가 두었다."
+]
+],
+"card": [
+"같은 틀을 쓰되 화면 색과 음악으로 시대를 구분한다.",
+"앞 이야기를 마쳐야 다음 이야기가 열리게 한다. 다 깼다는 기록은 그 기기 브라우저에만 남으니, 강의 전에 같은 기기로 미리 열어 둔다."
+],
+"age": null,
+"role": "",
+"place": "함께 만든 과정",
+"sc": "mk",
+"src": []
+},
+{
+"y": "7단계",
+"t": "고증 점검",
+"mu": "B",
+"L": [
+[
+"",
+"해 볼 때마다 틀린 곳이 하나씩 눈에 띄었다."
+],
+[
+"나",
+"여기 또 틀렸어. 여기도."
+],
+[
+"나",
+"왜 이렇게 오류가 많아."
+],
+[
+"Claude",
+"미안해요. 쓴 쪽이 자기 글을 검토하면 놓치게 돼요."
+],
+[
+"Claude",
+"점검표를 만들고, 이 대화를 모르는 새 Claude에게 검토를 맡길게요."
+],
+[
+"",
+"앞선 대화를 모르는 Claude 검토자가 출처를 하나하나 다시 열었다."
+],
+[
+"",
+"대사는 대본 작가 Claude들이 다듬었고, 마지막으로 Claude가 한 번 더 점검했다."
+],
+[
+"나",
+"그래도 이상한 데 보이면 또 말할게."
+],
+[
+"Claude",
+"네, 꼭 말해 주세요."
+]
+],
+"card": [
+"사건마다 인물의 나이·직위, 대사 속 정보가 알려진 시점, 카드 문장의 출처, 지어낸 설정을 표로 정리한다.",
+"검토는 앞선 대화를 모르는 새 창의 Claude나 다른 사람에게 점검표와 원고만 주고 맡긴다.",
+"끝내 원문을 못 연 자료는 쓰지 않거나 ‘미확인’으로 표시한다."
+],
+"age": null,
+"role": "",
+"place": "함께 만든 과정",
+"sc": "mk",
+"src": []
+},
+{
+"y": "8단계",
+"t": "함께 나누기",
+"mu": "A",
+"L": [
+[
+"",
+"게임은 아티팩트 링크 하나로 열리는 페이지가 됐다."
+],
+[
+"나",
+"이제 다른 선생님들한테 링크만 보내면 되겠다."
+],
+[
+"나",
+"연수에서 쓸 때는 지어낸 부분도 꼭 짚어 줘야겠어."
+],
+[
+"Claude",
+"점검표에 지어낸 설정을 따로 적어 뒀어요. 같이 보여 주시면 돼요."
+],
+[
+"Claude",
+"3부는 비워 뒀어요. 다음 이야기는 또 같이 채워요."
+],
+[
+"나",
+"그래. 다음에 또 하자."
+]
+],
+"card": [
+"완성본은 링크로 나눈다. 올리기 전에 휴대폰과 PC에서 링크로 열어 음악과 글꼴이 나오는지 확인한다.",
+"강의에서 쓸 때는 기록과 지어낸 설정을 구분해 알려 준다."
+],
+"age": null,
+"role": "",
+"place": "함께 만든 과정",
+"sc": "mk",
+"src": []
+}
+];
+let curAge=18;
+const mHair=()=>curAge>=60?C.lgr:curAge>=48?C.gry:C.ink;
+
+function adult(x,y,o={}){ // 6x12
+  const sk=o.skin||C.skin, hr=o.hair||C.ink, sh=o.shirt||C.navy, pt=o.pants||C.dk;
+  R(x+1,y,4,1,hr);R(x+1,y+1,4,3,sk);R(x+1,y+1,4,1,hr);
+  if(o.long){R(x,y+1,1,4,hr);R(x+5,y+1,1,4,hr)}
+  R(x+2,y+2,1,1,C.ink);R(x+4,y+2,1,1,C.ink);
+  R(x,y+4,6,5,sh);
+  if(o.up){R(x-1,y+1,1,4,sh);R(x+6,y+1,1,4,sh)}
+  if(o.hold) R(x+5,y+6,2,2,o.hold);
+  R(x+1,y+9,2,3,pt);R(x+3,y+9,2,3,pt);
+}
+function adultSeat(x,y,o={}){ // upper body only
+  const sk=o.skin||C.skin, hr=o.hair||C.ink, sh=o.shirt||C.navy;
+  R(x+1,y,4,1,hr);R(x+1,y+1,4,3,sk);R(x+1,y+1,4,1,hr);
+  if(o.long){R(x,y+1,1,4,hr);R(x+5,y+1,1,4,hr)}
+  R(x+2,y+2,1,1,C.ink);R(x+4,y+2,1,1,C.ink);R(x,y+4,6,4,sh);
+}
+function kid(x,y,i,o={}){ // 4x9
+  const hr=(i%3==0)?C.dwood:C.ink;
+  R(x,y,4,1,hr);R(x,y+1,4,2,C.skin);R(x+1,y+2,1,1,C.ink);R(x+3,y+2,1,1,C.ink);
+  R(x,y+3,4,3,kc(i));
+  if(o.up){R(x-1,y,1,3,kc(i));R(x+4,y,1,3,kc(i))}
+  if(o.cup){R(x+4,y+3,1,2,C.wht)}
+  if(o.book){R(x+4,y+3,2,2,o.book)}
+  R(x,y+6,1,3,C.dk);R(x+3,y+6,1,3,C.dk);
+}
+function kidSeat(x,y,i,o={}){
+  const hr=(i%3==0)?C.dwood:C.ink;
+  R(x,y,4,1,hr);R(x,y+1,4,2,C.skin);
+  if(o.back){R(x,y,4,3,hr);} else {R(x+1,y+2,1,1,C.ink);R(x+3,y+2,1,1,C.ink);}
+  R(x,y+3,4,3,kc(i));
+  if(o.up){R(x-1,y-1,1,4,kc(i));R(x+4,y-1,1,4,kc(i))}
+}
+function desk(x,y,w=10){R(x,y,w,2,C.wood);R(x+1,y+2,1,4,C.dwood);R(x+w-2,y+2,1,4,C.dwood)}
+function room(wall,floor,fy=58){R(0,0,160,fy,wall);R(0,fy,160,100-fy,floor);for(let x=8;x<152;x+=16)R(x,fy+(((x-8)/16)%2?14:28),1,2,C.dwood);R(0,fy-2,160,2,C.dwood)}
+function win(x,y,w,h,sky,frame=C.wht){R(x-1,y-1,w+2,h+2,frame);R(x,y,w,h,sky);R(x+(w>>1),y,1,h,frame);R(x,y+(h>>1),w,1,frame)}
+function board(x,y,w,h,t,lines=true){R(x-2,y-2,w+4,h+4,C.dwood);R(x,y,w,h,C.board);if(lines){for(let i=0;i<3;i++)R(x+4,y+4+i*6,Math.max(4,(w-12)*((i+1+((t/2000)|0))%3+1)/3),1,'#cfe8d0')}R(x+2,y+h+2,w-4,1,C.wood)}
+function seatedRows(x0,y0,cols,rows,dx,dy,opt={}){
+  let i=0;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++,i++){
+    const x=x0+c*dx, y=y0+r*dy, b=opt.bob?((Math.floor(opt.t/opt.bob)+i)%2):0;
+    kidSeat(x,y-b,i,{back:opt.back,up:opt.up&&((i+Math.floor(opt.t/300))%2==0)});
+    if(!opt.nodesk){desk(x-2,y+6,8);if(opt.book)R(x,y+5,4,2,opt.book);if(opt.lunch){R(x-1,y+4,6,3,C.lgr);R(x,y+5,4,1,C.wht);R(x+1+(i%2),y+5,1,1,C.yel)}}
+  }
+}
+const SC={
+ title(t){R(0,0,160,60,C.sky);for(let i=0;i<3;i++){const cx=((t/80+i*60)%200)-30;R(cx,10+i*7,18,4,C.wht);R(cx+4,7+i*7,10,3,C.wht)}
+   R(0,60,160,40,C.ground);R(20,26,120,36,C.wall);R(20,24,120,3,C.dwood);for(let i=0;i<6;i++){win(26+i*19,32,12,10,C.navy,C.wht);}R(72,48,16,14,C.dwood);R(10,30,1,32,C.lgr);R(11,30,10,6,C.wht);
+   R(140,38,4,24,C.dwood);R(134,26,16,14,C.grn);R(137,22,10,6,C.grn)},
+ office(t){room(C.wall,C.floor);win(124,10,26,24,C.sky);board(14,10,40,18,t,false);for(let i=0;i<6;i++)R(16+i*6,13,4,3,C.wht);
+   const seats=[1,0,1,0,0,1];seats.forEach((s,i)=>{const x=20+(i%3)*30,y=48+Math.floor(i/3)*16;if(s)adultSeat(x+2,y-8,{shirt:i%2?C.gry:C.navy,hair:C.ink});desk(x,y,18);});
+   adult(106,44,{shirt:C.gry,hair:C.lgr});adult(124,46,{shirt:C.wht,hair:mHair(),pants:C.dk})},
+ training(t){room(C.wall,C.floor);board(30,8,100,26,t);adult(18,40,{shirt:C.gry,hair:C.lgr,hold:C.wht});
+   for(let r=0;r<2;r++)for(let c=0;c<5;c++){const x=40+c*22,y=58+r*16;adultSeat(x,y-8,{shirt:(c+r)%2?C.dk:C.navy,hair:(c==2&&r==0)?mHair():C.ink});desk(x-4,y,14);R(x,y-1,6,1,C.wht);}},
+ book(t){room(C.wall,C.floor);board(36,8,88,24,t);win(136,10,18,24,C.sky);adult(18,40,{shirt:C.navy,hair:mHair(),hold:C.wht});
+   seatedRows(36,48,6,3,18,15,{t,book:C.wht,bob:700})},
+ emptydesk(t){room('#7a6a55','#4a3426');win(124,10,26,24,C.plum);R(124,22,26,12,C.org);
+   [0,1,2,3].forEach(i=>{const x=16+i*26,y=60;desk(x,y,20);if(i==1)adultSeat(x+6,y-8,{shirt:C.navy,hair:mHair()});if(i==2){R(x+8,y+4,6,2,C.dwood);R(x+15,y+1,4,5,C.dwood)}});
+   g.globalAlpha=.35;R(0,0,160,100,C.ink);g.globalAlpha=1;R(70,56,22,3,C.yel)},
+ envelope(t){room('#8d7d63','#4a3426');R(60,12,40,22,C.dwood);R(62,14,36,18,C.gry);win(124,10,24,22,C.lgr);
+   adultSeat(76,46,{shirt:C.dk,hair:C.lgr});R(48,56,64,6,C.wood);R(50,62,2,12,C.dwood);R(108,62,2,12,C.dwood);
+   R(70,52,12,6,C.yel);R(70,52,12,1,C.org);adult(118,50,{shirt:C.navy,hair:mHair()});g.globalAlpha=.25;R(0,0,160,100,C.ink);g.globalAlpha=1},
+ milk(t){R(0,0,160,50,C.sky);R(0,50,160,50,C.ground);R(10,20,140,32,C.wall);for(let i=0;i<7;i++)win(16+i*19,26,11,9,C.navy,C.wht);
+   R(118,64,16,12,C.gry);R(116,62,20,3,C.lgr);for(let i=0;i<3;i++){const s=(t/150+i*7)%14;R(122+i*4,58-s,1,2,C.wht)}
+   adult(104,58,{shirt:C.navy,hair:mHair(),hold:C.wht});
+   for(let i=0;i<9;i++){const x=88-i*9,b=((Math.floor(t/350)+i)%2);kid(x,64-b,i,{cup:true})}},
+ tent(t){R(0,0,160,48,C.sky);const sx=10+((t/60)%150);R(sx,6,6,6,C.yel);R(0,48,160,52,C.ground);
+   for(let i=0;i<14;i++)R(8+i*2,14+i*2,148-i*4,2,i%2?'#e8d8b0':'#d8c49a');R(8,42,144,2,'#b8a47a');R(8,42,2,10,C.dwood);R(150,42,2,10,C.dwood);
+   adult(76,40,{shirt:C.navy,hair:mHair()});
+   let i=0;for(let r=0;r<4;r++)for(let c=0;c<13;c++,i++){const x=6+c*12+(r%2)*5,y=58+r*10,b=((Math.floor(t/500)+i)%2);kidSeat(x,y-b,i,{back:true});R(x,y+6,4,1,C.dk)}},
+ evening(t){room('#8d7d63','#4a3426');board(30,8,80,24,t);win(122,8,30,28,C.org);R(122,22,30,14,C.plum);
+   R(78,0,4,4,C.gry);R(76,4,8,2,C.yel);g.globalAlpha=.2;R(50,6,60,60,C.yel);g.globalAlpha=1;
+   adult(16,40,{shirt:C.navy,hair:mHair()});seatedRows(48,52,4,2,22,16,{t,book:C.wht,bob:900})},
+ cheer(t){room(C.wall,C.floor);board(36,8,88,24,t,false);win(136,10,18,24,C.sky);adult(18,40,{shirt:C.navy,hair:mHair()});
+   seatedRows(36,50,6,3,18,15,{t,up:true,bob:220})},
+ charter(t){room(C.wall,C.floor);R(56,6,48,30,C.dwood);R(58,8,44,26,C.wht);for(let i=0;i<8;i++)R(61,11+i*3,38-(i%3)*4,1,C.gry);
+   adult(14,40,{shirt:C.navy,hair:mHair()});kid(30,46,1);
+   for(let r=0;r<3;r++)for(let c=0;c<7;c++){const i=r*7+c;kid(44+c*16,48+r*14-(((Math.floor(t/600)+i)%2)),i)}},
+ lunch(t){room(C.wall,C.floor);board(36,8,88,24,t,false);win(136,10,18,24,C.sky);
+   seatedRows(30,48,6,3,20,15,{t,lunch:true,bob:1200});const wx=20+Math.abs(((t/40)%240)-120);adult(Math.min(150,wx),36,{shirt:C.navy,hair:mHair()})},
+ tamgu(t){room(C.wall,C.floor);win(118,8,34,30,C.sky);R(124,24,12,14,C.grn);R(138,20,10,18,C.grn);board(20,8,80,24,t,false);
+   R(30,52,30,6,C.wood);for(let i=0;i<5;i++)R(34,46-i*2,14,2,i%2?C.yel:C.org);adult(52,40,{shirt:C.navy,hair:mHair()});
+   for(let i=0;i<7;i++){const x=70+i*12,b=((Math.floor(t/400)+i)%2);kid(x,62-b,i,{book:C.yel})}},
+ night(t){R(0,0,160,100,C.ink);for(let i=0;i<0;i++);R(0,64,160,36,'#11131f');R(20,30,120,36,C.dk);R(20,28,120,3,'#22283d');
+   for(let i=0;i<6;i++)R(26+i*19,38,12,10,'#22283d');const f=Math.floor(t/700)%7==0?C.org:C.yel;R(102,38,12,10,f);
+   g.globalAlpha=.15;R(96,48,24,18,C.yel);g.globalAlpha=1},
+ talk(t){room('#d9c7a0',C.floor);win(116,8,34,28,C.sky);R(120,30,6,6,C.grn);R(52,10,34,20,C.dwood);R(54,12,30,16,C.lgr);
+   adultSeat(66,42,{shirt:C.gry,hair:mHair()});R(40,52,60,6,C.wood);R(42,58,2,16,C.dwood);R(96,58,2,16,C.dwood);R(60,50,8,2,C.wht);
+   adult(110,52,{shirt:C.red,hair:C.ink,long:true,pants:C.navy})},
+ retire(t){room(C.wall,C.floor);R(10,6,140,10,C.red);for(let i=0;i<14;i++)R(16+i*9,10,5,2,C.wht);
+   for(let i=0;i<8;i++)adult(8+i*19,30,{shirt:i%2?C.gry:C.dk,hair:i%3?C.ink:C.lgr,long:i%2==0&&i>2,pants:C.dk});
+   adult(60,60,{shirt:C.navy,hair:mHair()});adult(92,60,{shirt:C.red,hair:C.ink,long:true,pants:C.navy});
+   const off=Math.min(14,Math.floor((t%5000)/250));R(66+off,66,6,4,C.dwood);R(67+off,66,4,1,C.org)}
+};
+/* ---------- 2부 장면 ---------- */
+const W2='#efe8d8', F2='#b98a5e', LINO='#9fb4c2', BEIGE='#d8d2c0', PINK='#f7a8c8';
+const hHair=()=>curAge>=58?C.gry:C.ink;
+const HK=()=>({shirt:C.red,hair:hHair(),long:true,pants:C.navy});
+const JM={shirt:C.gry,hair:C.lgr}, DY={shirt:C.teal,hair:C.ink,pants:C.dk};
+Object.assign(SC,{
+ s2_first(t){room(W2,F2);board(30,8,96,24,t);win(134,10,20,24,C.sky);adult(12,40,HK());adult(146,42,JM);
+   seatedRows(30,48,7,3,15,15,{t,bob:900})},
+ s2_pledge(t){R(0,0,160,100,'#232842');win(14,10,30,24,C.ink,'#566c86');R(36,13,3,3,C.yel);
+   R(22,62,116,6,C.wood);R(26,68,2,20,C.dwood);R(132,68,2,20,C.dwood);
+   R(118,44,2,18,C.gry);R(112,40,14,5,C.yel);g.globalAlpha=.16;R(70,44,70,20,C.yel);g.globalAlpha=1;
+   adultSeat(74,50,HK());R(66,58,22,4,C.wht);for(let i=0;i<2;i++)R(68,59+i*2,10+((Math.floor(t/600)+i)%3)*3,1,C.gry);
+   R(36,56,12,6,C.red);R(38,54,8,2,C.red);if(Math.floor(t/500)%2)R(30,52,3,1,C.wht)},
+ s2_music(t){room(W2,F2);board(20,8,80,24,t,false);for(let i=0;i<5;i++){R(26+i*14,14,3,8,C.wht);R(29+i*14,14,1,2,C.wht)}
+   R(110,44,40,14,C.dwood);R(112,44,36,3,C.wht);for(let i=0;i<6;i++)R(114+i*6,44,2,2,C.ink);adult(122,32,{shirt:C.plum,hair:C.ink,long:true,pants:C.dk});
+   adult(150,44,HK());seatedRows(16,52,5,3,18,14,{t,bob:600})},
+ s2_sign(t){R(0,0,160,56,C.sky);R(0,56,160,44,C.ground);R(14,18,132,40,W2);R(14,16,132,3,C.dwood);for(let i=0;i<6;i++)win(20+i*21,24,13,10,C.navy,C.wht);
+   R(64,44,22,14,C.dwood);R(118,40,6,30,C.lgr);R(110,34,22,12,C.wht);for(let i=0;i<5;i++)R(113+i*4,38,3,4,C.ink);
+   adult(98,58,HK());for(let i=0;i<6;i++){const b=((Math.floor(t/400)+i)%2);kid(20+i*12,72-b,i)}},
+ s2_english(t){room(W2,F2);board(30,8,96,24,t,false);const cc=[C.org,C.sky,C.lime,C.yel];for(let i=0;i<4;i++)R(36+i*22,14,16,10,cc[i]);
+   R(10,54,16,6,C.dk);R(12,55,4,4,C.lgr);R(19,55,4,4,C.lgr);adult(12,40,HK());seatedRows(34,48,7,3,15,15,{t,bob:800,book:C.wht})},
+ s2_lunch(t){room('#e6efe9',LINO);R(6,36,70,12,C.lgr);for(let i=0;i<3;i++){R(10+i*22,30,16,8,C.gry);R(12+i*22,28,12,2,C.lgr)}
+   adult(80,36,HK());for(let r=0;r<2;r++){R(20,62+r*18,130,4,C.wht);for(let c=0;c<8;c++){const x=24+c*16,y=54+r*18,i=r*8+c;kidSeat(x,y-(((Math.floor(t/700)+i)%2)),i,{});R(x-1,y+7,7,3,C.lgr);R(x,y+7,2,1,C.grn);R(x+3,y+7,2,1,C.org)}}},
+ s2_farewell(t){room(W2,LINO);win(124,10,26,24,C.sky);[0,1,2,3].forEach(i=>{const x=12+i*28,y=58;desk(x,y,22);if(i!=2){R(x+4,y-8,12,8,C.dwood);R(x+4,y-8,12,1,C.wood)}});
+   R(70,48,6,8,C.grn);R(68,44,4,4,C.red);R(73,43,4,4,C.yel);R(70,41,3,3,PINK);adultSeat(64,50,HK());adult(120,46,{shirt:C.dk,hair:C.lgr})},
+ s2_pc(t){room(W2,LINO);board(20,8,90,24,t);R(116,10,34,24,BEIGE);R(119,13,28,17,C.ink);
+   if(Math.floor(t/400)%6){R(121,15,24,13,C.blue);R(123,17,10,2,C.wht);R(123,21,16,1,C.cyan);R(123,24,12,1,C.cyan)}R(128,34,10,3,BEIGE);
+   adult(104,40,HK());seatedRows(20,50,6,3,16,15,{t,bob:900})},
+ s2_neis(t){room(W2,LINO);win(124,10,26,24,C.sky);for(let i=0;i<5;i++){const x=6+i*30,y=58;desk(x,y,24);R(x+6,y-10,12,9,BEIGE);R(x+7,y-9,10,6,(i+Math.floor(t/900))%2?C.blue:C.navy)}
+   adult(20,40,{shirt:C.navy,hair:C.ink});adult(40,40,{shirt:C.grn,hair:C.ink,long:true,pants:C.dk});adult(110,40,{shirt:C.dk,hair:C.gry});adult(76,42,HK())},
+ s2_rights(t){room(W2,LINO);board(30,8,80,24,t,false);R(118,8,30,36,C.wht);R(126,14,14,14,C.sky);R(130,16,6,6,C.skin);R(122,32,22,1,C.gry);R(122,36,18,1,C.gry);
+   R(14,52,24,6,C.wood);const o=Math.min(8,Math.floor((t%4000)/300));R(16+o,50,14-o,1,C.dwood);adult(40,40,HK());seatedRows(56,50,5,3,18,15,{t,bob:900})},
+ s2_flower(t){room(W2,LINO);board(30,8,96,24,t,false);adult(60,40,HK());kid(84,44,2);R(89,45,1,4,C.grn);R(88,43,3,3,C.red);R(80,47,3,3,C.wht);
+   seatedRows(30,58,7,2,16,15,{t,bob:700})},
+ s2_online(t){room('#e9e4f0','#8f7f9f');win(12,8,30,26,C.sky);R(30,62,100,5,C.wood);R(34,67,2,20,C.dwood);R(124,67,2,20,C.dwood);
+   R(52,40,48,22,C.dk);R(54,42,44,18,C.ink);let i=0;for(let r=0;r<3;r++)for(let c=0;c<4;c++,i++){const x=55+c*11,y=43+r*6;R(x,y,10,5,(i+Math.floor(t/800))%7==0?C.ink:C.navy);R(x+4,y+1,3,3,C.skin)}
+   R(48,62,56,2,C.gry);adultSeat(110,48,HK());adult(132,42,DY)},
+ s2_news(t){room(W2,LINO);R(56,6,48,30,C.dk);R(59,9,42,24,'#30455c');for(let i=0;i<4;i++)R(62,12+i*5,20+((i*11+Math.floor(t/500))%16),2,C.lgr);R(78,36,4,6,C.gry);
+   adult(46,52,HK());adult(66,52,DY);adult(92,52,{shirt:C.dk,hair:C.gry});adult(112,52,{shirt:C.grn,hair:C.ink,long:true,pants:C.dk})},
+ s2_last(t){room(W2,LINO);board(30,8,96,24,t,false);win(134,10,20,24,C.sky);g.globalAlpha=.15;R(100,12,46,76,C.yel);g.globalAlpha=1;
+   for(let i=0;i<4;i++){kidSeat(40+i*22,60,i,{});desk(38+i*22,66,8)}adult(30,40,HK());adult(130,40,DY);
+   const off=Math.min(16,Math.floor((t%5000)/250));R(108+off,46,6,4,C.dwood);R(109+off,46,4,1,C.org)}
+});
+
+Object.assign(SC,{
+ leave61(t){room(C.wall,C.floor);win(124,10,26,24,C.sky);R(127,24,7,9,C.org);R(137,20,9,12,C.yel);board(14,10,40,18,t,false);
+   [0,1,2].forEach(i=>desk(16+i*30,56,18));adultSeat(22,48,{shirt:C.gry,hair:C.ink});adultSeat(52,48,{shirt:C.navy,hair:mHair()});
+   adult(100,44,{shirt:C.dk,hair:C.wht,hold:C.dwood});R(104,49,9,7,C.dwood);R(105,49,7,1,C.wood);R(106,47,4,2,C.wht)},
+ tonghap(t){room(C.wall,C.floor);board(26,8,92,22,t,false);const bc=[C.yel,C.lime,C.org];for(let i=0;i<3;i++){R(34+i*28,12,20,14,bc[i]);R(36+i*28,14,16,2,C.wht);R(36+i*28,18,10,1,C.ink)}
+   adult(12,42,{shirt:C.org,hair:C.ink,long:true,pants:C.dk});adult(142,42,{shirt:C.gry,hair:mHair()});
+   seatedRows(30,50,6,3,17,14,{t,bob:600,book:C.yel})},
+ s2_open(t){room(W2,LINO);R(14,8,62,24,C.wht);const cc=[C.org,C.sky,C.lime,C.yel,PINK];for(let i=0;i<5;i++)R(18+i*11,12+(i%2)*7,9,8,cc[i]);win(124,10,26,24,C.sky);
+   for(let gI=0;gI<3;gI++){const gx=12+gI*48,gy=66;for(let k=0;k<2;k++)kidSeat(gx+5+k*12,gy-7,gI*4+k,{});
+     R(gx,gy,28,6,C.wood);R(gx+2,gy+6,2,8,C.dwood);R(gx+24,gy+6,2,8,C.dwood);R(gx+6,gy+1,5,3,C.wht);R(gx+16,gy+1,5,3,cc[gI]);
+     for(let k=0;k<2;k++){const b=((Math.floor(t/500)+k+gI)%2);kidSeat(gx+5+k*12,gy+8-b,gI*4+k+2,{back:true})}}
+   adult(86,44,HK())}
+});
+
+SC.title2=function(t){R(0,0,160,60,'#8fd3ff');for(let i=0;i<3;i++){const cx=((t/80+i*60)%200)-30;R(cx,10+i*7,18,4,C.wht);R(cx+4,7+i*7,10,3,C.wht)}
+  R(0,60,160,40,'#d6b98c');R(14,16,132,46,'#efe8d8');R(14,14,132,3,'#8e9aa6');
+  for(let r=0;r<3;r++)for(let i=0;i<7;i++){if(r==2&&(i==3))continue;win(20+i*18,21+r*13,11,8,'#3b5dc9',C.wht)}
+  R(70,48,20,14,'#7f9fb4');R(79,48,2,14,C.wht);R(62,8,36,6,C.wht);R(64,10,32,2,C.navy);
+  R(8,28,1,34,C.lgr);R(9,28,9,6,C.wht);
+  R(150,40,3,22,C.dwood);R(143,30,17,13,'#f7a8c8');R(146,26,11,6,'#f7a8c8');
+  for(let i=0;i<6;i++){const x=(i*29+t/30)%160,y=(i*17+t/22)%40+30;R(x,y,1,1,'#f7a8c8')}
+  R(24,74,14,1,C.wht);R(24,74,1,8,C.wht);R(37,74,1,8,C.wht)};
+let menuPin=0;
+function menuArt(t){
+  let cl2=false; try{cl2=!!store.get('tr_clear2',false)}catch(e){}
+  if(!cl2){SC.title(t);return}
+  const P=7000, k=Math.floor(t/P), ph=(t%P)/700;
+  let cur=menuPin||(k%2?2:1), prev=menuPin?cur:(k%2?1:2);
+  const A=n=>n===2?SC.title2:SC.title;
+  if(menuPin||ph>=1){A(cur)(t);return}
+  A(prev)(t); g.save(); g.beginPath(); g.rect(0,0,Math.ceil(160*ph/8)*8,100); g.clip(); A(cur)(t); g.restore();
+}
+SC.mk=function(t){room('#e9e4f0','#a08c78');win(124,10,26,24,C.sky);
+  R(30,62,100,5,C.wood);R(34,67,2,20,C.dwood);R(124,67,2,20,C.dwood);
+  R(54,34,52,28,C.dk);R(56,36,48,24,C.ink);const k=Math.max(0,ei)%8,b=Math.floor(t/500)%2;
+  if(k===0){for(let i=0;i<5;i++)R(60,39+i*4,20+((i*7)%18),2,C.lgr)}
+  else if(k===1){for(let i=0;i<4;i++){R(60,39+i*5,3,3,i<3?C.lime:C.gry);R(66,40+i*5,22,1,C.lgr)}}
+  else if(k===2){for(let i=0;i<4;i++){const h=4+((i*5+Math.floor(t/300))%9);R(62+i*9,56-h,3,h,C.yel);R(62+i*9,56-h,6,2,C.yel)}}
+  else if(k===3){R(58,38,44,20,C.sky);R(58,50,44,8,C.ground);R(66,44,4,6,C.red);R(84,44,4,6,C.teal)}
+  else if(k===4){R(60,38,30,18,C.navy);R(92,42,9,14,C.gry);R(93,43,7,11,C.blue);if(b)R(62,40,26,1,C.yel)}
+  else if(k===5){R(58,38,44,20,'#d4d0c8');R(58,38,44,4,'#0a246a');R(60,46,20,2,C.ink);R(60,50,30,2,C.ink)}
+  else if(k===6){R(60,40,26,16,C.wht);for(let i=0;i<3;i++)R(63,43+i*4,18,1,C.gry);R(84,46,8,8,C.org);R(86,48,4,4,C.ink);R(91,53,4,3,C.org)}
+  else {R(66,40,24,16,C.blue);R(70,44,16,8,C.cyan);R(76,40,4,16,C.blue);R(66,46,24,4,C.blue)}
+  R(78,62,6,2,C.gry);adultSeat(36,48,{shirt:C.org,hair:C.ink});R(132,40,12,12,C.org);R(135,43,6,6,C.yel);if(b)R(137,45,2,2,C.wht)};
+let curScene='title', sceneT0=performance.now();
+/* 화면 맞춤: 장면을 무대 비율에 맞게 넓히고, 가장자리 색을 늘려 빈 곳을 채운다 */
+let LW=160, LH=100, OX=0, OY=0;
+function fit(){
+  const st=document.getElementById('stage'); const W=st.clientWidth, H=st.clientHeight; if(!W||!H) return;
+  const asp=W/H;
+  LW=Math.max(160,Math.min(300,Math.round(100*asp))); LH=Math.max(100,Math.min(240,Math.round(160/asp)));
+  cv.width=LW; cv.height=LH; dG.imageSmoothingEnabled=false;
+  OX=Math.floor((LW-160)/2); OY=Math.floor((LH-100)*0.5);
+  const sc=Math.min(W/LW,H/LH); cv.style.width=Math.round(LW*sc)+'px'; cv.style.height=Math.round(LH*sc)+'px';
+}
+window.addEventListener('resize',fit); new ResizeObserver(fit).observe(document.getElementById('stage'));
+function blit(){
+  const rw=LW-OX-160, bh=LH-OY-100;
+  dG.drawImage(off,OX,OY);
+  if(OY>0) dG.drawImage(off,0,0,160,1,OX,0,160,OY);
+  if(bh>0) dG.drawImage(off,0,99,160,1,OX,OY+100,160,bh);
+  if(OX>0){dG.drawImage(off,0,0,1,100,0,OY,OX,100); if(OY>0)dG.drawImage(off,0,0,1,1,0,0,OX,OY); if(bh>0)dG.drawImage(off,0,99,1,1,0,OY+100,OX,bh)}
+  if(rw>0){dG.drawImage(off,159,0,1,100,OX+160,OY,rw,100); if(OY>0)dG.drawImage(off,159,0,1,1,OX+160,0,rw,OY); if(bh>0)dG.drawImage(off,159,99,1,1,OX+160,OY+100,rw,bh)}
+}
+function loop(now){
+  g=offG; (SC[curScene]||SC.title)(now-sceneT0); blit();
+  if(document.getElementById('menu').classList.contains('on')){g=menuG;menuArt(now);g=offG}
+  requestAnimationFrame(loop) }
+fit(); requestAnimationFrame(loop);
+
+/* ---------- 소리 ---------- */
+const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let soundOn=store.get('tr_on',true), musicVol=store.get('tr_music2',0.7), sfxVol=store.get('tr_sfx',0.7), ac=null;
+const TR={A:new Audio('theme.mp3'),B:new Audio('shadow.mp3'),C:new Audio('event.mp3'),D:new Audio('record.mp3'),E:new Audio('p2a.mp3'),F:new Audio('p2b.mp3'),G:new Audio('p2c.mp3'),H:new Audio('p2d.mp3'),M:new Audio('main.mp3')};
+Object.entries(TR).forEach(([k,a])=>{a.loop=true;a.preload=k==='M'?'auto':'none';a.setAttribute('playsinline','')});
+const lvl={A:0,B:0,C:0,D:0,E:0,F:0,G:0,H:0,M:0}, nodes={}, fades={};
+function ensureNodes(){
+  if(!ac||nodes.M) return;
+  try{ Object.keys(TR).forEach(k=>{const src=ac.createMediaElementSource(TR[k]);const gn=ac.createGain();gn.gain.value=lvl[k];src.connect(gn).connect(ac.destination);nodes[k]=gn;TR[k].volume=1}); }
+  catch(e){ Object.keys(nodes).forEach(k=>delete nodes[k]); }
+}
+function setLevel(k,v){ lvl[k]=v; if(nodes[k]&&ac){const g=nodes[k].gain,t=ac.currentTime;g.cancelScheduledValues(t);g.setValueAtTime(v,t)} else { try{TR[k].volume=v}catch(e){} } }
+function stopTrack(k){ clearTimeout(fades[k]); clearInterval(fades[k]); setLevel(k,0); TR[k].pause(); }
+function fadeEl(key,v){
+  const a=TR[key];
+  if(Math.abs((lvl[key]||0)-v)<0.001 && (v>0)===!a.paused) return;
+  clearTimeout(fades[key]); clearInterval(fades[key]);
+  if(v<=0 && a.paused){ setLevel(key,0); return; }
+  if(v>0 && a.paused){ a.play().catch(()=>{}); }
+  const from=lvl[key]||0; lvl[key]=v;
+  if(nodes[key]&&ac){
+    const g=nodes[key].gain,t=ac.currentTime; g.cancelScheduledValues(t); g.setValueAtTime(from,t); g.linearRampToValueAtTime(v,t+0.9);
+    if(v<=0) fades[key]=setTimeout(()=>{ if(lvl[key]<=0) a.pause(); },1000);
+  } else {
+    let cur=from; fades[key]=setInterval(()=>{ const d=v-cur;
+      if(Math.abs(d)<=0.03){ clearInterval(fades[key]); try{a.volume=v}catch(e){} if(v<=0) a.pause(); return; }
+      cur+=Math.sign(d)*0.03; try{a.volume=Math.min(1,Math.max(0,cur))}catch(e){} },40);
+  }
+}
+let want={key:null,vol:0};
+function setMusic(key,vol){ want={key,vol}; Object.keys(TR).forEach(k=>fadeEl(k, soundOn&&k===key?vol*musicVol:0)); }
+const LV={A:0.3,B:0.27,C:0.27,off:0};
+const P2K={A:'E',B:'F',C:'G',D:'H'};
+function blip(){
+  if(!soundOn||!ac||sfxVol<=0)return;
+  const o=ac.createOscillator(), gn=ac.createGain();
+  o.type='square'; o.frequency.value=560+Math.random()*140;
+  gn.gain.setValueAtTime(0.05*sfxVol,ac.currentTime); gn.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+0.045);
+  o.connect(gn).connect(ac.destination); o.start(); o.stop(ac.currentTime+0.05);
+}
+function chime(){
+  if(!soundOn||!ac||sfxVol<=0)return;
+  [660,880].forEach((f,k)=>{const o=ac.createOscillator(),gn=ac.createGain();o.type='square';o.frequency.value=f;
+    const s=ac.currentTime+k*0.09;gn.gain.setValueAtTime(0.055*sfxVol,s);gn.gain.exponentialRampToValueAtTime(0.0001,s+0.12);o.connect(gn).connect(ac.destination);o.start(s);o.stop(s+0.13)});
+}
+
+/* ---------- 진행 ---------- */
+const PARTS={
+ 0:{EV:EV0,name:'나',intro:'당신은 2026년,\n게임을 만드는 사람입니다.',refs:'',
+    end:['만들기 끝','교사로 다시 태어나기 · 만든 과정','질문 하나에서 시작해<br>리서치, 음악, 게임, 검증을 거쳐<br>링크 하나가 됐다.',''],endSc:'mk',music:true},
+ 1:{EV:EV1,name:'정만석',intro:'당신은 1945년,\n18살 정만석입니다.',refs:`
+        <li><a href="https://theme.archives.go.kr/next/koreaOfRecord/compulsoryEdu.do" target="_blank" rel="noopener">국가기록원, 기록으로 보는 대한민국</a> — 의무교육·급식·혼분식·과외·평준화·국민교육헌장·방학</li>
+        <li><a href="https://www.archives.go.kr/next/search/listSubjectDescription.do?id=003190" target="_blank" rel="noopener">국가기록원, 교원양성 정책 주제설명</a></li>
+        <li><a href="https://db.history.go.kr/contemp/level.do?levelId=dh_012_1949_05_06_0180" target="_blank" rel="noopener">국사편찬위원회, 자료대한민국사</a> — 동광신문 1949.5.6 교원 숙청 기사</li>
+        <li><a href="https://dh.aks.ac.kr/Edu/wiki/index.php/%ED%95%B4%EB%B0%A9_3%EB%85%84_%EA%B5%90%EC%9C%A1%EC%9D%BC%EC%A7%80" target="_blank" rel="noopener">한국학중앙연구원, 해방 3년 교육일지</a> — 미군정 문서 발췌</li>
+        <li><a href="https://www.seoul.co.kr/news/1998/11/03/19981103001001" target="_blank" rel="noopener">서울신문 1998 원문 기사</a> — 교원 정년의 변천</li>
+        <li><a href="https://encykorea.aks.ac.kr/Article/E0075681" target="_blank" rel="noopener">한국민족문화대백과사전</a> — 바둑이와 철수, 중학교 무시험진학제, 광주교육대학교</li>
+        <li><a href="https://hangyo.com/news/article.html?no=81385" target="_blank" rel="noopener">한국교육신문, 이길상 「&lt;새교육&gt;으로 본 교육사」</a></li>
+        <li><a href="https://encykorea.aks.ac.kr/Article/E0005441" target="_blank" rel="noopener">한국민족문화대백과사전 「교과서」</a></li>
+        <li><a href="https://koreascience.kr/article/JAKO200927964151413.pdf" target="_blank" rel="noopener">김창복·이경순(2009), 초등교육, 아동학회지 30(6)</a></li>
+        <li>세계일보 · YTN · 뉴시스 보도</li>
+      `,
+    end:['1부 끝','정만석 · 교단 46년','1946년 석 달짜리 강습으로 교단에 선 그는<br>1992년 교장으로 정년을 맞았다.<br>2011년 세상을 떠났다.','2부 · 윤혜경 (1987 — 2027)'],endSc:'retire',music:true},
+ 2:{EV:EV2,name:'윤혜경',intro:'당신은 1987년,\n23살 윤혜경입니다.',refs:`
+        <li><a href="https://www.seoul.co.kr/news/1990/12/15/19901215015001" target="_blank" rel="noopener">서울신문 1990 — 2020 원문 기사</a> — 여교사 비율·교과전담·열린 교육·초등 영어·급식·NEIS</li>
+        <li><a href="https://theme.archives.go.kr/next/koreaOfRecord/cafeteria.do" target="_blank" rel="noopener">국가기록원, 기록으로 보는 대한민국</a> — 학교급식</li>
+        <li><a href="https://hangyo.com/news/article.html?no=1058" target="_blank" rel="noopener">한국교육신문</a> — 교원 정년 단축·교실 정보화·인권조례·청탁금지법 보도</li>
+        <li><a href="https://www.khan.co.kr/article/202212091015001" target="_blank" rel="noopener">진실화해위원회 전교조 해직 사건 규명 보도</a> (경향신문 2022)</li>
+        <li><a href="http://www.kice.re.kr" target="_blank" rel="noopener">권점례 외(2020), COVID-19 대응 온라인 개학에 따른 초, 중, 고등학교 원격 수업 실태 및 개선 방향 탐색(한국교육과정평가원)</a></li>
+        <li>서울신문 · 주간경향 · 머니투데이 · 헤럴드경제 · 동행미디어 시대 보도</li>
+      `,
+    end:['2부 끝','윤혜경 · 교단 40년','1987년 쉰두 명의 이름으로 시작한 그는<br>2027년 2월 교단을 떠난다.<br>출석부는 서도윤에게 건너갔다.',''],endSc:'s2_last',music:true}
+};
+let curPart=1, EV=EV1;
+const pm=(k,v)=>setMusic(k&&curPart===2?P2K[k]:k, v);
+
+const $=id=>document.getElementById(id);
+let ei=-1, queue=[], typing=null, full='', phase='idle', log=[];
+function paintProg(){const n=EV.length,box=$('prog');if(box.children.length!==n)box.innerHTML='<i></i>'.repeat(n);[...box.children].forEach((el,i)=>{el.className=i<ei?'d':i===ei?'c':''})}
+function hud(e){$('hYear').textContent=e.y;$('hAge').textContent=e.age==null?'':e.age+'세';$('hRole').textContent=e.role;$('hPlace').textContent=e.place}
+function startEvent(i){
+  ei=i; paintProg(); const e=EV[i]; curAge=e.age; curScene=e.sc; sceneT0=performance.now(); hud(e);
+  queue=e.L.slice(); $('txt').textContent=''; $('who').classList.add('hid'); $('choices').innerHTML=''; $('next').style.visibility='hidden';
+  $('bYear').textContent=e.age==null?e.y:e.y+' · '+e.age+'세'; $('bTitle').textContent=e.t; $('banner').classList.add('on'); phase='banner';
+  pm(e.mu==='off'||!e.mu?null:e.mu, LV[e.mu]||0); chime();
+  clearTimeout(startEvent.tm); startEvent.tm=setTimeout(endBanner,1800);
+}
+function endBanner(){ if(phase!=='banner')return; $('banner').classList.remove('on'); phase='lines'; nextLine() }
+function nextLine(){
+  $('choices').innerHTML='';
+  if(!queue.length){phase='cardwait';$('next').style.visibility='hidden';clearTimeout(openCard.tm);openCard();return}
+  const it=queue.shift();
+  if(it.choice){showChoice(it.choice);return}
+  const [who,text]=it;
+  const w=$('who'); w.classList.toggle('hid',!who); w.textContent=who||'·'; $('txt').classList.toggle('nar',!who);
+  typeText(text);
+}
+function typeText(text){
+  full=text; let k=0; $('txt').textContent=''; $('next').style.visibility='hidden'; phase='typing';
+  clearTimeout(typing);
+  const step=()=>{
+    k++; const ch=full[k-1]; $('txt').textContent=full.slice(0,k);
+    if(ch&&!/\s|[.,…!?·]/.test(ch)) blip();
+    if(k>=full.length){typing=null;phase='lines';$('next').style.visibility='visible';return}
+    const d=/[.!?]/.test(ch)?320:/[,…]/.test(ch)?200:68;
+    typing=setTimeout(step,d);
+  };
+  typing=setTimeout(step,120);
+}
+function showChoice(opts){
+  phase='choice'; $('next').style.visibility='hidden';
+  const box=$('choices');
+  opts.forEach(([label,reply])=>{const b=document.createElement('button');b.className='btn';b.textContent='▶ '+label;
+    b.onclick=ev=>{ev.stopPropagation();queue=reply.concat(queue);box.innerHTML='';phase='lines';nextLine()};box.appendChild(b)});
+}
+function openCard(){
+  const e=EV[ei]; phase='card'; [...$('prog').children].forEach((el,i)=>{if(i<=ei)el.className='d'});
+  log.push({y:e.y,a:e.age,t:e.t});
+  $('cYear').textContent=(curPart===0?'따라 하기 · ':'그때는 · ')+e.y; $('cTitle').textContent=e.t;
+  $('cBody').innerHTML=e.card.map(p=>'<p>'+p+'</p>').join('');
+  $('cSrc').innerHTML=e.src.map(([k,l,u])=>'<div><span class="tag '+(S[k]||'t5')+'">'+k+'</span><a href="'+u+'" target="_blank" rel="noopener">'+l+'</a></div>').join('');
+  $('bCardNext').textContent= ei<EV.length-1 ? (curPart===0?'다음 단계로 ▶':'다음 해로 ▶') : (curPart===0?'마치기 ▶':curPart+'부 마치기 ▶');
+  $('card').classList.add('on'); $('card').scrollTop=0;
+  if(e.mu==='off'||!e.mu) pm('D',0.17);
+}
+function advance(){
+  if(phase==='banner'){clearTimeout(startEvent.tm);endBanner();return}
+  if(phase==='typing'){clearTimeout(typing);$('txt').textContent=full;phase='lines';$('next').style.visibility='visible';return}
+  if(phase==='lines'){nextLine()}
+}
+$('dlg').addEventListener('click',advance);
+$('stage').addEventListener('click',advance);
+function anyOpen(){return ['confirm','log','card','menu','refs','end'].some(id=>$(id).classList.contains('on'))}
+document.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){
+  if(phase==='intro'){e.preventDefault();$('intro').click();return}
+  if($('confirm').classList.contains('on'))return;
+  if($('card').classList.contains('on')){e.preventDefault();$('bCardNext').click();return}
+  if(!anyOpen()&&(phase==='banner'||phase==='typing'||phase==='lines')){e.preventDefault();advance()}}});
+$('bCardNext').onclick=()=>{$('card').classList.remove('on'); if(ei<EV.length-1) startEvent(ei+1); else showEnd()};
+function showEnd(){const P=PARTS[curPart];store.set('tr_clear'+curPart,true);phase='end';curScene=P.endSc;$('endH2').textContent=P.end[0];$('endH3').textContent=P.end[1];$('endP').innerHTML=P.end[2];$('endNext').textContent=P.end[3];$('endNext').style.display=P.end[3]?'':'none';$('end').classList.add('on');$('end').scrollTop=0;pm('D',0.27)}
+
+const primed={};
+function prime(keys){ keys.forEach(k=>{ if(primed[k]) return; primed[k]=true; const a=TR[k]; a.preload='auto'; if(lvl[k]===0 && !(want.key===k)){ const p=a.play(); if(p&&p.then) p.then(()=>{ if(lvl[k]===0 && want.key!==k) a.pause(); }).catch(()=>{}); } }); }
+function unlock(){
+  if(!ac){try{ac=new (window.AudioContext||window.webkitAudioContext)()}catch(e){ac=null}}
+  if(ac&&ac.state==='suspended') ac.resume().catch(()=>{});
+  ensureNodes();
+  prime(['M']);
+}
+document.addEventListener('pointerdown',()=>{const first=!ac;unlock();if(first&&$('menu').classList.contains('on'))setMusic('M',0.3)},{capture:true});
+function closeAll(){['menu','refs','intro','card','log','end','confirm'].forEach(id=>$(id).classList.remove('on'))}
+let introTimer=null, introFull='';
+function goMenu(){clearTimeout(typing);clearTimeout(openCard.tm);clearTimeout(startEvent.tm);clearInterval(introTimer);introTimer=null;phase='idle';closeAll();$('banner').classList.remove('on');$('menu').classList.add('on');$('app').classList.remove('p2');paintMenu();menuPin=0;curScene='title';setMusic('M',0.3)}
+document.querySelectorAll('.goMenu').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();goMenu()}));
+$('bHome').onclick=e=>{e.stopPropagation();$('confirm').classList.add('on')};
+$('bYes').onclick=goMenu;
+$('bNo').onclick=()=>$('confirm').classList.remove('on');
+function openPart(n){
+  unlock(); prime(n===2?['E','F','G','H']:['A','B','C','D']); curPart=n; EV=PARTS[n].EV; closeAll(); $('app').classList.toggle('p2',n===2);
+  $('hName').textContent=PARTS[n].name; $('refsPart').textContent=n+'부 · '+PARTS[n].name; $('refsList').innerHTML=PARTS[n].refs;
+  $('refs').classList.add('on'); $('refs').scrollTop=0; phase='refs'; pm('D',0.22); sizeDlg();
+  if(n===0) $('bRefsGo').onclick();
+}
+document.querySelector('#menu .big').addEventListener('click',()=>openPart(0));
+$('p1').onclick=()=>openPart(1);
+$('p2').onclick=()=>{if(store.get('tr_clear1',false))openPart(2)};
+function paintMenu(){const ok=!!store.get('tr_clear1',false);$('p2').classList.toggle('locked',!ok);$('p2').disabled=!ok;$('p2y').textContent=ok?'1987 — 2027':'잠겨 있음'}
+['p1','p2'].forEach((id,i)=>{$(id).addEventListener('pointerenter',()=>{menuPin=i+1});$(id).addEventListener('pointerleave',()=>{menuPin=0})});
+paintMenu();
+$('bRefsGo').onclick=()=>{
+  closeAll(); $('intro').classList.add('on'); phase='intro'; setMusic(null,0); ei=-1; paintProg();
+  const e=EV[0]; curAge=e.age; curScene=e.sc; hud(e);
+  introFull=PARTS[curPart].intro; let k=0; $('introTxt').textContent=''; $('introNext').style.visibility='hidden';
+  clearInterval(introTimer);
+  introTimer=setInterval(()=>{k++;const ch=introFull[k-1];$('introTxt').textContent=introFull.slice(0,k);if(ch&&!/\s|[.,]/.test(ch))blip();
+    if(k>=introFull.length){clearInterval(introTimer);introTimer=null;$('introNext').style.visibility='visible'}},110);
+};
+$('intro').onclick=()=>{
+  if(introTimer){clearInterval(introTimer);introTimer=null;$('introTxt').textContent=introFull;$('introNext').style.visibility='visible';return}
+  $('intro').classList.remove('on'); log=[]; startEvent(0);
+};
+function openLog(){$('logList').innerHTML=log.length?log.map(l=>'<li><b>'+l.y+(l.a==null?'':' · '+l.a+'세')+'</b>'+l.t+'</li>').join(''):'<li>아직 기록이 없습니다.</li>';$('log').classList.add('on')}
+$('bLog').onclick=e=>{e.stopPropagation();openLog()};
+$('bEndLog').onclick=openLog;
+$('bLogClose').onclick=()=>$('log').classList.remove('on');
+
+
+/* 대화창 높이: 현재 부의 가장 긴 대사가 들어가는 높이로 고정 */
+function sizeDlg(){
+  const d=$('dlg'), m=$('dlgM'); if(!d.clientWidth) return;
+  m.className=''; m.style.cssText=''; 
+  const cs=getComputedStyle(d);
+  m.style.width=d.offsetWidth+'px'; m.style.padding=cs.padding; m.style.boxSizing='border-box'; m.style.border=cs.border;
+  const wM=$('whoM'), tM=$('txtM'), cM=$('choicesM');
+  wM.textContent='윤혜경';
+  let mx=0, prev='';
+  const meas=(txt,ch)=>{tM.textContent=txt;cM.innerHTML='';if(ch)ch.forEach(([l])=>{const b=document.createElement('button');b.className='btn';b.textContent='▶ '+l;cM.appendChild(b)});mx=Math.max(mx,m.offsetHeight)};
+  const walk=L=>L.forEach(it=>{ if(it.choice){meas(prev,it.choice);it.choice.forEach(([,r])=>walk(r))} else {prev=it[1];meas(it[1])} });
+  EV.forEach(e=>walk(e.L));
+  const cap=Math.round(window.innerHeight*0.5);
+  d.style.height=Math.min(mx+4,cap)+'px'; d.style.overflowY=mx+4>cap?'auto':'hidden';
+}
+window.addEventListener('resize',()=>{clearTimeout(sizeDlg.t);sizeDlg.t=setTimeout(sizeDlg,80)});
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(sizeDlg);
+sizeDlg();
+
+/* 소리 단추 */
+function paintSound(){
+  $('mute').classList.toggle('off',!soundOn); $('mute').textContent=soundOn?'♪':'×';
+  $('vMusic').value=Math.round(musicVol*100); $('vSfx').value=Math.round(sfxVol*100);
+  $('vMusicV').textContent=Math.round(musicVol*100); $('vSfxV').textContent=Math.round(sfxVol*100);
+}
+function applyNow(){ Object.keys(TR).forEach(k=>{clearTimeout(fades[k]);clearInterval(fades[k]);const v=soundOn&&k===want.key?want.vol*musicVol:0;if(v>0){setLevel(k,v);if(TR[k].paused)TR[k].play().catch(()=>{})}else stopTrack(k)}) }
+$('mute').onclick=e=>{e.stopPropagation();unlock();soundOn=!soundOn;store.set('tr_on',soundOn);paintSound();setMusic(want.key,want.vol)};
+$('bVol').onclick=e=>{e.stopPropagation();unlock();$('snd').classList.toggle('on')};
+$('bVolClose').onclick=e=>{e.stopPropagation();$('snd').classList.remove('on')};
+$('snd').addEventListener('click',e=>e.stopPropagation());
+$('vMusic').oninput=e=>{musicVol=e.target.value/100;store.set('tr_music2',musicVol);paintSound();applyNow()};
+$('vSfx').oninput=e=>{sfxVol=e.target.value/100;store.set('tr_sfx',sfxVol);paintSound();blip()};
+paintSound();
+</script>
+</body>
+</html>
